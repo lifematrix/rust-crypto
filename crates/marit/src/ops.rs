@@ -277,7 +277,7 @@ impl MarInt {
         (quotient, rem as u64)
     }
 
-    pub fn to_dec_str(&self) -> String {
+    pub fn to_decimal_string(&self) -> String {
         if self.is_zero() {
             return "0".to_string();
         }
@@ -302,5 +302,13 @@ impl MarInt {
         }
 
         result
+    }
+}
+
+use core::fmt;
+
+impl fmt::Display for MarInt {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+
     }
 }

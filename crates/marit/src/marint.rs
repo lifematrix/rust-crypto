@@ -108,7 +108,7 @@ impl MarInt {
         Self::cmp_limbs(&self.limbs, &other.limbs)
     }
 
-    pub(crate) fn cmp_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Ordering {
+    pub fn cmp_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Ordering {
         if a.len() != b.len() {
             return a.len().cmp(&b.len());
         }
