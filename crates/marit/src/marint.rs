@@ -8,6 +8,7 @@ use crate::sign::MSgn::{MPos, MNeg, MZero};
 #[derive(Debug, Clone)]
 pub struct MarInt {
     pub sign: MSgn,
+    // little endian
     pub limbs: Vec<u64>,
 }
 
@@ -37,9 +38,10 @@ impl MarInt {
 
     #[inline]
     pub(crate) fn split_u128(value: u128) -> (u64, u64) {
+        (lo, hi)
         (
-            (value & 0xFFFF_FFFF_FFFF_FFFF) as u64,
-            (value >> 64) as u64,
+            (value & 0xFFFF_FFFF_FFFF_FFFF) as u64,  
+            (value >> 64) as u64,                    
         )
     }
 
@@ -61,8 +63,18 @@ impl MarInt {
     }
 
     pub fn form_i128(value: i128) -> Self {
+        // if value == 0 {
+        //     return Self::zero()
+        // }
+        // else {
+        //     let mut x = Self::from_u128(value.abs() as u128);
+        //     if value < 0 {
+        //         x.sign = MNeg;
+        //     }
+        //     return x; 
+        // }
         match value {
-            0 => Self::new(),
+            0 => Self::zero(),
             _ => {
                 let mut x = Self::from_u128(value.abs() as u128);
                 if value < 0 {
@@ -84,7 +96,7 @@ impl MarInt {
         vec![1 as u64]
     }
 
-    pub fn is_zero_limbs(limbs: &Vec<u64>) -> bool {
+    pub fn is_zero_limbs(limbs: &[u64]) -> bool {
         limbs.len() == 1 && limbs[0] == 0
     }
 
@@ -126,29 +138,29 @@ impl MarInt {
     pub fn add_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
         let mut result = Vec::with_capacity(a.len().max(b.len()) + 1);
 
-        let (min_len, longer) = if a.len() > b.len() {
+        let (comm_len, longer_one) = if a.len() > b.len() {
             (b.len(), a)
         } else {
             (a.len(), b)
         };
 
         let mut carry: u64 = 0;
-        for i in 0..min_len {
+        for i in 0..comm_len {
             let x: u128 = a[i] as u128 + b[i] as u128 + carry as u128;
             let (low, high) = Self::split_u128(x);          
             result.push(low);
             carry = high;
         }
 
-        for i in min_len..longer.len() {
+        for i in comm_len..longer_one.len() {
             if carry != 0 {
-                let x: u128 = longer[i] as u128 + carry as u128;
+                let x: u128 = longer_one[i] as u128 + carry as u128;
                 let (low, high) = Self::split_u128(x);
                 result.push(low);
                 carry = high;    
             }
             else {
-                result.push(longer[i]);
+                result.push(longer_one[i]);
             }
         }
 
