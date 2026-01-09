@@ -38,17 +38,19 @@ impl MarInt {
 
     #[inline]
     pub(crate) fn split_u128(value: u128) -> (u64, u64) {
-        (lo, hi)
-        (
+        let (lo, hi) = (
             (value & 0xFFFF_FFFF_FFFF_FFFF) as u64,  
             (value >> 64) as u64,                    
-        )
+        );
+
+        (lo, hi)
     }
 
     pub fn from_u128(value: u128) -> Self{
         let (low, high) = Self::split_u128(value);
-        // let low = (value & 0xFFFF_FFFF) as u64;
-        // let high = (value >> 32) as u64;
+        if value == 0 {
+            return Self::zero();
+        }
 
         let limbs = if high != 0 {
             vec![low, high]
@@ -63,16 +65,6 @@ impl MarInt {
     }
 
     pub fn form_i128(value: i128) -> Self {
-        // if value == 0 {
-        //     return Self::zero()
-        // }
-        // else {
-        //     let mut x = Self::from_u128(value.abs() as u128);
-        //     if value < 0 {
-        //         x.sign = MNeg;
-        //     }
-        //     return x; 
-        // }
         match value {
             0 => Self::zero(),
             _ => {
@@ -135,6 +127,26 @@ impl MarInt {
         Ordering::Equal
     }
 
+    // pub fn add_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
+    //     let n = a.len().max(b.len());
+    //     let mut result= Vec::with_capacity(n + 1);
+
+    //     let mut carry: u128 = 0;
+    //     for i in 0..n {
+    //         let av = a.get(i).copied().unwrap_or(0) as u128;
+    //         let bv = b.get(i).copied().unwrap_or(0) as u128;
+
+    //         let sum = av + bv + carry;
+    //         result.push(sum as u64);
+    //         carry = sum >> 64;
+    //     }
+
+    //     if carry != 0 {
+    //         result.push(carry as u64);
+    //     }
+    //     result
+    // }
+
     pub fn add_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
         let mut result = Vec::with_capacity(a.len().max(b.len()) + 1);
 
@@ -181,11 +193,11 @@ impl MarInt {
         let mut result = Vec::with_capacity(a.len());
 
         let mut borrow: u64 = 0;
-        let mut minuend: u64 = 0;
-        let mut subtrahend: u64 = 0;
+        let mut minuend: u128;
+        let mut subtrahend: u128;
         for i in 0..b.len() {
-            minuend = a[i] as u64;
-            subtrahend = b[i] as u64 + borrow as u64;
+            minuend = a[i] as u128;
+            subtrahend = b[i] as u128 + borrow as u128;
             if minuend >= subtrahend {
                 borrow = 0;
             }
@@ -199,8 +211,8 @@ impl MarInt {
 
         for i in b.len()..a.len() {
             if borrow != 0 {
-                minuend = a[i] as u64;
-                subtrahend = borrow as u64;
+                minuend = a[i] as u128;
+                subtrahend = borrow as u128;
 
                 if minuend >= subtrahend {
                     borrow = 0;
@@ -237,4 +249,16 @@ impl MarInt {
             limbs.truncate(trimmed_len);
         }
     }
+
+    pub fn normalize(&mut self) {
+        // trim most-significant zeros (end of Vec because LE)
+        Self::trim_trailing_zero(&mut self.limbs);
+        // canonical zero
+        if self.is_zero() {
+            self.sign = MZero;
+        }
+
+    }
+
+
 }
