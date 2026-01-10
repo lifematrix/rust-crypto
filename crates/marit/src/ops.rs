@@ -813,4 +813,181 @@ mod tests {
             }
         }
     }
+
+    // For Sub Operation
+
+    #[test]
+    fn test_sub_zero_rules() {
+        let z = mi_zero();
+        let a = mi_pos(&[5]);
+        let b = mi_neg(&[7, 2]);
+
+        // a - 0 = a
+        let r1 = a.clone() - z.clone();
+        assert_eq!(r1.sign, a.sign);
+        assert_eq!(r1.limbs, a.limbs);
+
+        // 0 - a = -a
+        let r2 = z.clone() - a.clone();
+        assert_eq!(r2.sign, MNeg);
+        assert_eq!(r2.limbs, a.limbs);
+
+        // 0 - (-b) = +b
+        let r3 = z - b.clone();
+        assert_eq!(r3.sign, MPos);
+        assert_eq!(r3.limbs, b.limbs);
+
+        assert!(is_valid(&r1));
+        assert!(is_valid(&r2));
+        assert!(is_valid(&r3));
+    }
+
+    #[test]
+    fn test_sub_same_sign_basic() {
+        // 9 - 7 = 2
+        let a = mi_pos(&[9]);
+        let b = mi_pos(&[7]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![2]);
+        assert!(is_valid(&c));
+
+        // 7 - 9 = -2
+        let a = mi_pos(&[7]);
+        let b = mi_pos(&[9]);
+        let c = a - b;
+        assert_eq!(c.sign, MNeg);
+        assert_eq!(c.limbs, vec![2]);
+        assert!(is_valid(&c));
+
+        // (-9) - (-7) = -(9-7) = -2
+        let a = mi_neg(&[9]);
+        let b = mi_neg(&[7]);
+        let c = a - b;
+        assert_eq!(c.sign, MNeg);
+        assert_eq!(c.limbs, vec![2]);
+        assert!(is_valid(&c));
+
+        // (-7) - (-9) = +2
+        let a = mi_neg(&[7]);
+        let b = mi_neg(&[9]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![2]);
+        assert!(is_valid(&c));
+    }
+
+    #[test]
+    fn test_sub_opposite_sign_adds_magnitudes() {
+        // 7 - (-9) = 16
+        let a = mi_pos(&[7]);
+        let b = mi_neg(&[9]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![16]);
+
+        // (-7) - (9) = -16
+        let a = mi_neg(&[7]);
+        let b = mi_pos(&[9]);
+        let c = a - b;
+        assert_eq!(c.sign, MNeg);
+        assert_eq!(c.limbs, vec![16]);
+    }
+
+    #[test]
+    fn test_sub_equal_is_zero() {
+        let a = mi_pos(&[123456]);
+        let b = mi_pos(&[123456]);
+        let c = a - b;
+        assert_eq!(c.sign, MZero);
+        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert!(is_valid(&c));
+
+        // (-x) - (-x) = 0
+        let a = mi_neg(&[42, 7]);
+        let b = mi_neg(&[42, 7]);
+        let c = a - b;
+        assert_eq!(c.sign, MZero);
+        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert!(is_valid(&c));
+    }
+
+    #[test]
+    fn test_sub_borrow_propagation() {
+        // 2^64 - 1 = [u64::MAX]
+        // 2^64 = [0,1]
+        // 2^64 - 1 = 2^64 + 0 - 1 => [u64::MAX]
+        let a = mi_pos(&[0, 1]); // 2^64
+        let b = mi_pos(&[1]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![u64::MAX]);
+        assert!(is_valid(&c));
+
+        // (2^128) - 1 = [u64::MAX, u64::MAX]
+        let a = mi_pos(&[0, 0, 1]); // 2^128
+        let b = mi_pos(&[1]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![u64::MAX, u64::MAX]);
+        assert!(is_valid(&c));
+
+        // Borrow across middle zeros: [0,0,5] - [1] => [u64::MAX, u64::MAX, 4]
+        let a = mi_pos(&[0, 0, 5]);
+        let b = mi_pos(&[1]);
+        let c = a - b;
+        assert_eq!(c.sign, MPos);
+        assert_eq!(c.limbs, vec![u64::MAX, u64::MAX, 4]);
+        assert!(is_valid(&c));
+    }
+
+    #[test]
+    fn test_sub_matches_i128_for_small_values() {
+        let vals: [i128; 15] = [
+            -1000, -123, -7, -2, -1, 0, 1, 2, 7, 123, 999,
+            (1i128 << 31) - 1,
+            -((1i128 << 31) - 1),
+            (1i128 << 63) - 1,
+            -((1i128 << 63) - 1),
+        ];
+
+        for &x in &vals {
+            for &y in &vals {
+                let a: MarInt = x.to_string().parse().unwrap();
+                let b: MarInt = y.to_string().parse().unwrap();
+                let c = a.clone() - b.clone();
+
+                let ax = to_i128(&a).unwrap();
+                let by = to_i128(&b).unwrap();
+                let expected = ax - by;
+
+                let got = to_i128(&c).expect("result too large for i128 in this test set");
+                assert_eq!(got, expected, "a={:?}, b={:?}, c={:?}", a, b, c);
+                assert!(is_valid(&c));
+            }
+        }
+    }
+
+    #[test]
+    fn test_sub_relation_with_add_and_neg() {
+        // a - b == a + (-b)
+        let vals = [
+            mi_zero(),
+            mi_pos(&[1]),
+            mi_pos(&[7]),
+            mi_neg(&[7]),
+            mi_pos(&[u64::MAX]),
+            mi_neg(&[2, 3]),
+        ];
+
+        for a in &vals {
+            for b in &vals {
+                let left = a.clone() - b.clone();
+                let right = a.clone() + (MarInt { sign: -b.sign, limbs: b.limbs.clone() }); // if you implement Neg, prefer -b.clone()
+                assert_eq!(left.sign, right.sign, "a={:?}, b={:?}", a, b);
+                assert_eq!(left.limbs, right.limbs, "a={:?}, b={:?}", a, b);
+                assert!(is_valid(&left));
+            }
+        }
+    }
 }
