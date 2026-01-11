@@ -2,7 +2,6 @@ use std::ops::{Add, AddAssign};
 use std::cmp::Ordering;
 use crate::marint::MarInt;
 use crate::sign::MSgn::*;
-use crate::ops::complex::complex_add;
 
 impl MarInt {
     pub fn add_limbs(a: &[u64], b: &[u64]) -> Vec<u64> {
