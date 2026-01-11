@@ -1,7 +1,6 @@
 
 #[cfg(test)]
 mod tests {
-    use marint::sign::MSgn;
     use marint::sign::MSgn::*;
     use marint::marint::MarInt;
 

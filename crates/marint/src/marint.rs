@@ -112,7 +112,7 @@ impl MarInt {
         Self::cmp_limbs(&self.limbs, &other.limbs)
     }
 
-    pub fn cmp_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Ordering {
+    pub fn cmp_limbs(a: &[u64], b: &[u64]) -> Ordering {
         if a.len() != b.len() {
             return a.len().cmp(&b.len());
         }
@@ -125,113 +125,6 @@ impl MarInt {
         }
 
         Ordering::Equal
-    }
-
-    // pub fn add_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
-    //     let n = a.len().max(b.len());
-    //     let mut result= Vec::with_capacity(n + 1);
-
-    //     let mut carry: u128 = 0;
-    //     for i in 0..n {
-    //         let av = a.get(i).copied().unwrap_or(0) as u128;
-    //         let bv = b.get(i).copied().unwrap_or(0) as u128;
-
-    //         let sum = av + bv + carry;
-    //         result.push(sum as u64);
-    //         carry = sum >> 64;
-    //     }
-
-    //     if carry != 0 {
-    //         result.push(carry as u64);
-    //     }
-    //     result
-    // }
-
-    pub fn add_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
-        let mut result = Vec::with_capacity(a.len().max(b.len()) + 1);
-
-        let (comm_len, longer_one) = if a.len() > b.len() {
-            (b.len(), a)
-        } else {
-            (a.len(), b)
-        };
-
-        let mut carry: u64 = 0;
-        for i in 0..comm_len {
-            let x: u128 = a[i] as u128 + b[i] as u128 + carry as u128;
-            let (low, high) = Self::split_u128(x);          
-            result.push(low);
-            carry = high;
-        }
-
-        for i in comm_len..longer_one.len() {
-            if carry != 0 {
-                let x: u128 = longer_one[i] as u128 + carry as u128;
-                let (low, high) = Self::split_u128(x);
-                result.push(low);
-                carry = high;    
-            }
-            else {
-                result.push(longer_one[i]);
-            }
-        }
-
-        if carry != 0 {
-            result.push(carry);
-        }
-        
-        result
-    }
-
-
-    pub fn sub_limbs(a: &Vec<u64>, b: &Vec<u64>) -> Vec<u64> {
-        debug_assert!(
-            Self::cmp_limbs(a, b) != Ordering::Less,
-            "sub_limbs: first operand must be >= the second one! a = {:?}, b = {:?}", a, b
-        );
-
-        let mut result = Vec::with_capacity(a.len());
-
-        let mut borrow: u64 = 0;
-        let mut minuend: u128;
-        let mut subtrahend: u128;
-        for i in 0..b.len() {
-            minuend = a[i] as u128;
-            subtrahend = b[i] as u128 + borrow as u128;
-            if minuend >= subtrahend {
-                borrow = 0;
-            }
-            else {
-                minuend += 1<<64;
-                borrow = 1;
-            }
-            let difference = minuend - subtrahend;
-            result.push(difference as u64);
-        }
-
-        for i in b.len()..a.len() {
-            if borrow != 0 {
-                minuend = a[i] as u128;
-                subtrahend = borrow as u128;
-
-                if minuend >= subtrahend {
-                    borrow = 0;
-                }
-                else {
-                    minuend += 1<<64;
-                    borrow = 1;
-                }
-                let difference = minuend - subtrahend;
-                result.push(difference as u64);
-            }
-            else {
-                result.push(a[i]);
-            }
-        }
-
-        Self::trim_trailing_zero(&mut result);
-
-        result
     }
 
     pub fn trim_trailing_zero(limbs: &mut Vec<u64>) {
@@ -257,6 +150,5 @@ impl MarInt {
         if self.is_zero() {
             self.sign = MZero;
         }
-
     }
 }
