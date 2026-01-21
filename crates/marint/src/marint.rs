@@ -1,5 +1,4 @@
-use std::ops::{Add, Neg, Sub, Mul};
-use std::cmp::{min, max, Ordering};
+use std::cmp::Ordering;
 use crate::sign::MSgn;
 use crate::sign::MSgn::{MPos, MNeg, MZero};
 
@@ -13,10 +12,16 @@ pub struct MarInt {
 }
 
 impl MarInt {
+    pub const LIMB_BITS: u32 = 64;
+    pub const LIMB_BASE: u128 = 1u128 << Self::LIMB_BITS;
+    pub const LIMB_MASK: u128 = Self::LIMB_BASE - 1;
+}
+
+impl MarInt {
     pub fn new() -> Self {
         Self {
             sign: MZero,
-            limbs: vec![0],
+            limbs: Self::limbs_zero(),
         }
     }
 
@@ -28,12 +33,11 @@ impl MarInt {
         Self::from_u64(1)
     }
 
-    pub fn from_u64(value: u64) -> Self{
-        Self {
-            sign: MPos,
-            limbs: vec![value],
+    pub fn from_u64(value: u64) -> Self {
+        if value == 0 {
+            return Self::zero();
         }
-
+        Self { sign: MPos, limbs: vec![value] }
     }
 
     #[inline]
@@ -64,14 +68,18 @@ impl MarInt {
         }
     }
 
-    pub fn form_i128(value: i128) -> Self {
+    pub fn from_i128(value: i128) -> Self {
         match value {
             0 => Self::zero(),
+            i128::MIN => {
+                let mut x = Self::from_u128(1u128 << 127);
+                x.sign = MNeg;
+                x
+            } 
             _ => {
+                // safe because i128::MIN handled above
                 let mut x = Self::from_u128(value.abs() as u128);
-                if value < 0 {
-                    x.sign = MNeg;
-                }
+                if value < 0 { x.sign = MNeg; }
                 x
             } 
         }
@@ -79,21 +87,25 @@ impl MarInt {
 
     
     #[inline]
-    pub fn zero_limbs() -> Vec<u64> {
-        vec![0 as u64]
+    pub fn limbs_zero() -> Vec<u64> {
+        vec![0]
     }
 
     #[inline]
-    pub fn one_limbs() -> Vec<u64> {
-        vec![1 as u64]
+    pub fn limbs_one() -> Vec<u64> {
+        vec![1]
     }
 
-    pub fn is_zero_limbs(limbs: &[u64]) -> bool {
+    pub fn is_limbs_zero(limbs: &[u64]) -> bool {
         limbs.len() == 1 && limbs[0] == 0
     }
 
+    pub fn is_limbs_one(limbs: &[u64]) -> bool {
+        limbs.len() == 1 && limbs[0] == 1
+    }
+
     pub fn is_zero(&self) -> bool {
-        Self::is_zero_limbs(&self.limbs)
+        self.sign == MZero || Self::is_limbs_zero(&self.limbs)
     }
 
     pub fn abs(&self) -> Self {
@@ -127,25 +139,34 @@ impl MarInt {
         Ordering::Equal
     }
 
-    pub fn trim_trailing_zero(limbs: &mut Vec<u64>) {
-        let mut num_trailing_zero: usize = 0;
-        for i in (0..limbs.len()).rev() {
-            if limbs[i] == 0 {
-                num_trailing_zero += 1;
-            } else {
-                break;
-            }
+    pub fn normalize_limbs(limbs: &mut Vec<u64>) {
+        // let mut num_trailing_zero: usize = 0;
+        // for i in (0..limbs.len()).rev() {
+        //     if limbs[i] == 0 {
+        //         num_trailing_zero += 1;
+        //     } else {
+        //         break;
+        //     }
+        // }
+
+        // if num_trailing_zero > 0 {
+        //     let trimmed_len = std::cmp::max(limbs.len() - num_trailing_zero, 1);
+        //     limbs.truncate(trimmed_len);
+        // }
+
+        if limbs.is_empty() {
+            limbs.push(0);
+            return;
         }
 
-        if num_trailing_zero > 0 {
-            let trimmed_len = std::cmp::max(limbs.len() - num_trailing_zero, 1);
-            limbs.truncate(trimmed_len);
+        while limbs.len() > 1 && *limbs.last().unwrap() == 0 {
+            limbs.pop();
         }
     }
 
     pub fn normalize(&mut self) {
         // trim most-significant zeros (end of Vec because LE)
-        Self::trim_trailing_zero(&mut self.limbs);
+        Self::normalize_limbs(&mut self.limbs);
         // canonical zero
         if self.is_zero() {
             self.sign = MZero;

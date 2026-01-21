@@ -6,4 +6,11 @@ edition = "2024"
 [dependencies]
 
 [dev-dependencies]
+num-bigint = "0.4"
+num-traits = "0.2"
 rand = "0.8"
+
+
+[[example]]
+name = "div-long_div_a"
+path = "examples/div/long_div_a.rs"

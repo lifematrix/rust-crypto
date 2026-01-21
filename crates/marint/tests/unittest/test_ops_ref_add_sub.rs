@@ -213,11 +213,11 @@ mod operators_ref_add_sub_tests {
             let xa: i128 = rng.gen_range(-1_000_000..=1_000_000);
             let xb: i128 = rng.gen_range(-1_000_000..=1_000_000);
 
-            let a = MarInt::form_i128(xa);
-            let b = MarInt::form_i128(xb);
+            let a = MarInt::from_i128(xa);
+            let b = MarInt::from_i128(xb);
 
             // Addition
-            let expected_add = MarInt::form_i128(xa + xb);
+            let expected_add = MarInt::from_i128(xa + xb);
 
             let c1 = &a + &b;
             let c2 = a.clone() + &b;
@@ -234,7 +234,7 @@ mod operators_ref_add_sub_tests {
             assert_eq!(c3.limbs, expected_add.limbs);
 
             // Subtraction
-            let expected_sub = MarInt::form_i128(xa - xb);
+            let expected_sub = MarInt::from_i128(xa - xb);
 
             let d1 = &a - &b;
             let d2 = a.clone() - &b;

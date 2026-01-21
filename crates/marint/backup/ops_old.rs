@@ -40,30 +40,6 @@ impl MarInt {
 }
 
 /* -----------------------------
- * Neg
- * ----------------------------- */
-
-impl Neg for MarInt {
-    type Output = Self;
-
-    fn neg(mut self) -> Self {
-        self.sign = -self.sign;
-        if self.is_zero() {
-            self.sign = MZero;
-        }
-        self
-    }
-}
-
-impl Neg for &MarInt {
-    type Output = MarInt;
-
-    fn neg(self) -> MarInt {
-        -self.clone()
-    }
-}
-
-/* -----------------------------
  * AddAssign
  * ----------------------------- */
 
@@ -504,7 +480,7 @@ impl MarInt {
                 if part.len() == b.len() {
                     q_try = (part[part.len()-1] as u64 / b[b.len()-1] as u64) as u64;
                 } else {
-                    let ph = (part[part.len()-1] as u64) << 32;
+                    let ph = (part[part.len()-1] as u64) << 64;
                     let pl = part[part.len()-2] as u64;
                     q_try = ((ph + pl) / b[b.len()-1] as u64) as u64; 
                 }

@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod test_large_number_ops {
     use super::*;
-    use marint::sign::MSgn::*;
-    use marint::sign::MSgn;
-    use marint::marint::MarInt;
+    use marint::MSgn::*;
+    use marint::MSgn;
+    use marint::MarInt;
 
     #[derive(Clone, Debug)]
     struct Case {

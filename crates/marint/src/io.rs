@@ -70,7 +70,7 @@ impl FromStr for MarInt {
         const CHUNK: usize = 19;
 
 
-        let mut limbs = MarInt::zero_limbs();
+        let mut limbs = MarInt::limbs_zero();
         let first_len = digits.len() % CHUNK;
         let first_len = if first_len == 0 { CHUNK } else { first_len };
 

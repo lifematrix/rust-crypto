@@ -1,9 +1,33 @@
 use std::ops::{Add, AddAssign};
 use std::cmp::Ordering;
-use crate::marint::MarInt;
+use crate::MarInt;
 use crate::sign::MSgn::*;
 
 impl MarInt {
+    pub fn limbs_add_by_u64(limbs: &[u64], u: u64) -> Vec<u64> {
+        if u == 0 {
+            return limbs.to_vec();
+        }
+
+        let mut result = limbs.to_vec();
+        let mut carry: u64 = u;
+        let mut i = 0usize;
+
+        while carry != 0 {
+            if i == result.len() {
+                result.push(0);
+            }
+
+            let m = (result[i] as u128) + carry as u128;
+            let (ml, mh) = Self::split_u128(m);
+            result[i] = ml;
+            carry = mh;
+            i += 1;
+        }
+
+        result
+    }
+
     pub fn add_limbs(a: &[u64], b: &[u64]) -> Vec<u64> {
         let mut result = Vec::with_capacity(a.len().max(b.len()) + 1);
 
@@ -55,9 +79,9 @@ impl MarInt {
             (a.sign, Self::add_limbs(&a.limbs, &b.limbs))
         } else {
             match Self::cmp_limbs(&a.limbs, &b.limbs) {
-                Ordering::Greater => (a.sign, Self::sub_limbs(&a.limbs, &b.limbs)),
-                Ordering::Less => (b.sign, Self::sub_limbs(&b.limbs, &a.limbs)),
-                Ordering::Equal => (MZero, Self::zero_limbs()),
+                Ordering::Greater => (a.sign, Self::sub_limbs(&a.limbs, &b.limbs, true)),
+                Ordering::Less => (b.sign, Self::sub_limbs(&b.limbs, &a.limbs, true)),
+                Ordering::Equal => (MZero, Self::limbs_zero()),
             }
         };
 

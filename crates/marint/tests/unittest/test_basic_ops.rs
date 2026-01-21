@@ -1,8 +1,8 @@
 
 #[cfg(test)]
 mod tests {
-    use marint::sign::MSgn::*;
-    use marint::marint::MarInt;
+    use marint::MSgn::*;
+    use marint::MarInt;
 
     // Helper: check canonical invariant: no leading zeros, except [0].
     fn is_canonical(limbs: &[u64]) -> bool {
@@ -215,7 +215,7 @@ mod tests {
         MarInt { sign: MNeg, limbs: limbs.to_vec() }
     }
     fn mi_zero() -> MarInt {
-        MarInt { sign: MZero, limbs: MarInt::zero_limbs() }
+        MarInt { sign: MZero, limbs: MarInt::limbs_zero() }
     }
 
     // Convert a small MarInt (<=2 limbs) to i128 for cross-check tests.
@@ -293,7 +293,7 @@ mod tests {
         let c = a + b;
 
         assert_eq!(c.sign, MZero);
-        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert_eq!(c.limbs, MarInt::limbs_zero());
     }
     #[test]
     fn test_add_carry_propagation() {
@@ -322,15 +322,15 @@ mod tests {
 
         let r1 = a.clone() * z.clone();
         assert_eq!(r1.sign, MZero);
-        assert_eq!(r1.limbs, MarInt::zero_limbs());
+        assert_eq!(r1.limbs, MarInt::limbs_zero());
 
         let r2 = z.clone() * b.clone();
         assert_eq!(r2.sign, MZero);
-        assert_eq!(r2.limbs, MarInt::zero_limbs());
+        assert_eq!(r2.limbs, MarInt::limbs_zero());
 
         let r3 = z.clone() * z;
         assert_eq!(r3.sign, MZero);
-        assert_eq!(r3.limbs, MarInt::zero_limbs());
+        assert_eq!(r3.limbs, MarInt::limbs_zero());
     }
 
     #[test]
@@ -361,7 +361,7 @@ mod tests {
         let a = mi_neg(&[123]);
         let c = a * z;
         assert_eq!(c.sign, MZero);
-        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert_eq!(c.limbs, MarInt::limbs_zero());
     }
 
     #[test]
@@ -566,7 +566,7 @@ mod tests {
         let b = mi_pos(&[123456]);
         let c = a - b;
         assert_eq!(c.sign, MZero);
-        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert_eq!(c.limbs, MarInt::limbs_zero());
         assert!(is_valid(&c));
 
         // (-x) - (-x) = 0
@@ -574,7 +574,7 @@ mod tests {
         let b = mi_neg(&[42, 7]);
         let c = a - b;
         assert_eq!(c.sign, MZero);
-        assert_eq!(c.limbs, MarInt::zero_limbs());
+        assert_eq!(c.limbs, MarInt::limbs_zero());
         assert!(is_valid(&c));
     }
 
