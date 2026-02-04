@@ -157,6 +157,33 @@ impl MarInt {
 
         (q, r)
     }
+
+    /// Euclidean division: remainder is always non-negative.
+    /// Adjusts the truncating quotient/remainder when remainder is negative.
+    pub fn div_euclid(&self, rhs: &MarInt) -> MarInt {
+        let (mut q, mut r) = self.div_rem(rhs);
+        if r.sign == MNeg {
+            // r += |rhs|
+            r += rhs.abs();
+            // q -= sign(rhs)
+            let mut adj = MarInt::one();
+            adj.sign = rhs.sign;
+            q -= &adj;
+        }
+        q
+    }
+
+    /// Euclidean remainder: always in [0, |rhs|).
+    pub fn rem_euclid(&self, rhs: &MarInt) -> MarInt {
+        let (mut q, mut r) = self.div_rem(rhs);
+        if r.sign == MNeg {
+            r += rhs.abs();
+            let mut adj = MarInt::one();
+            adj.sign = rhs.sign;
+            q -= &adj;
+        }
+        r
+    }
 }
 
 use std::ops::{Div, Rem};

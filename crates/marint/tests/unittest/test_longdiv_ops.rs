@@ -153,6 +153,47 @@ fn check_div_rem_case(a: &MarInt, b: &MarInt) {
     assert!(rb < bb, "remainder magnitude not < divisor: |r|={rb} |b|={bb}");
 }
 
+fn check_div_rem_euclid_case(a: &MarInt, b: &MarInt) {
+    if b.is_zero() {
+        return;
+    }
+
+    let q = a.div_euclid(b);
+    let r = a.rem_euclid(b);
+
+    assert_normalized_le(&q.limbs);
+    assert_normalized_le(&r.limbs);
+
+    let a_bi = marint_to_bigint(a);
+    let b_bi = marint_to_bigint(b);
+
+    // Build expected Euclidean q/r from BigInt truncating div/rem.
+    let mut q_bi = &a_bi / &b_bi;
+    let mut r_bi = &a_bi % &b_bi;
+    if r_bi.is_negative() {
+        r_bi += b_bi.abs();
+        q_bi -= b_bi.signum();
+    }
+
+    let q_expected = bigint_to_marint(&q_bi);
+    let r_expected = bigint_to_marint(&r_bi);
+
+    assert_eq!(q.sign, q_expected.sign, "euclid quot sign mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(q.limbs, q_expected.limbs, "euclid quot limbs mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(r.sign, r_expected.sign, "euclid rem sign mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(r.limbs, r_expected.limbs, "euclid rem limbs mismatch: a={a_bi} b={b_bi}");
+
+    // Reconstruction property: a = q*b + r
+    let recon = marint_to_bigint(&q) * &b_bi + marint_to_bigint(&r);
+    assert_eq!(recon, a_bi, "euclid reconstruction failed: a != q*b + r");
+
+    // Euclidean remainder constraint: 0 <= r < |b|
+    let rb = marint_to_bigint(&r);
+    assert!(!rb.is_negative(), "euclid remainder is negative: r={rb}");
+    let bb = b_bi.abs();
+    assert!(rb < bb, "euclid remainder not < |b|: r={rb} |b|={bb}");
+}
+
 #[test]
 fn div_rem_small_known_values() {
     let cases: &[(i128, i128)] = &[
@@ -223,6 +264,44 @@ fn div_rem_divisor_one_and_minus_one_many_limbs() {
 
         check_div_rem_case(&a, &one);
         check_div_rem_case(&a, &neg_one);
+    }
+}
+
+#[test]
+fn div_rem_euclid_small_known_values() {
+    let cases: &[(i128, i128)] = &[
+        (0, 1),
+        (1, 1),
+        (7, 3),
+        (10, 3),
+        (-10, 3),
+        (10, -3),
+        (-10, -3),
+        (i128::MAX, 7),
+        (i128::MIN + 1, 5),
+    ];
+
+    for &(a, b) in cases {
+        if b == 0 { continue; }
+        let aa = MarInt::from_i128(a);
+        let bb = MarInt::from_i128(b);
+        check_div_rem_euclid_case(&aa, &bb);
+    }
+}
+
+#[test]
+fn div_rem_euclid_many_limb_random_stress() {
+    let mut rng = StdRng::seed_from_u64(0xEUC11D_7777_1234);
+    let limb_sizes = [1usize, 2, 3, 4, 8, 16, 32];
+
+    for &na in &limb_sizes {
+        for &nb in &limb_sizes {
+            for _ in 0..200 {
+                let a = rand_marint(&mut rng, na);
+                let b = rand_nonzero_marint(&mut rng, nb);
+                check_div_rem_euclid_case(&a, &b);
+            }
+        }
     }
 }
 
