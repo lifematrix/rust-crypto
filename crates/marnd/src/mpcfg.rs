@@ -21,7 +21,7 @@ impl MPCfg {
     }
 
     pub fn keys(&self) -> impl Iterator<Item = &str> {
-        self.c.keys().map(|s| s.as_str());
+        self.c.keys().map(|s| s.as_str())
     }
 
     pub fn get_u64(&self, key: &str) -> Result<Option<u64>, MBErr> {

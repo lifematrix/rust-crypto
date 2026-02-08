@@ -28,6 +28,12 @@ pub trait MPRng {
         (self.next_u64() >> 63) != 0
     }
 
+
+    // fn choice<'aa, T>(&mut self, elements: &'aa [T], probs: &[f64]) -> &'aa T {
+    //     let idx = self.choice_idx(probs);
+    //     &elements[idx]
+    // }
+
     /// Fill a buffer with random bytes.
     fn fill(&mut self, out: &mut [u8]) {
         let mut i = 0;
@@ -57,3 +63,58 @@ pub trait MPRng {
         dur.as_secs().wrapping_shl(32) ^ nanos
     }
 }
+
+pub trait MPRngExt: MPRng {
+    fn choice_idx(&mut self, probs: &[f64]) -> usize {
+        if probs.is_empty() {
+            return 0; 
+        }
+
+        #[cfg(debug_assertions)]
+        {
+            let probs_debug_str = if probs.len() <= 3 {
+                format!("[{}]", probs.iter().map(|p| format!("{p}")).collect::<Vec<_>>().join(", "))
+            } else {
+                format!("[{}, {}, ..., {}]", 
+                    probs[0],
+                    probs[1],
+                    probs[probs.len() - 1]
+                )
+            };
+
+            for (i, &p) in probs.iter().enumerate() {
+                if p < 0.0 || p > 1.0 {
+                    panic!("Invalid probability at index {i}: {p:.12}. Probs: {probs_debug_str}");
+                } 
+            }
+
+            let sum_p = probs.iter().sum::<f64>();
+            if (sum_p - 1.0).abs() >= 1e-12 {
+                panic!("sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {probs_debug_str}");
+            }
+        }
+
+        let mut cum_p = 0.0;   // cumulative probability
+        let target_p = self.next_f64();  
+
+        for (i, &p) in probs.iter().enumerate() {
+            cum_p += p;
+            if cum_p > target_p {
+                return i;
+            }
+        }
+        return probs.len() - 1;
+    }
+
+    fn choice<'a, T>(&mut self, elements: &'a [T], probs: &[f64]) -> &'a T {
+        assert_eq!(
+            elements.len(),
+            probs.len(),
+            "elements and probs must have same length"
+        );
+        &elements[self.choice_idx(probs)]
+    }
+}
+
+// This makes *every* MPRng implement MPRngExt automatically (including Lcg64).
+impl<R: MPRng + ?Sized> MPRngExt for R {}
