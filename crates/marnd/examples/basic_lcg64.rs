@@ -1,6 +1,7 @@
 use marnd::{MPCfg, MPBuilder, MPRng};
 
 fn main() {
+    println!("infinity: {}, {}", f32::INFINITY== f32::INFINITY, f32::NEG_INFINITY==f32::NEG_INFINITY);
     let mut cfg = MPCfg::new();
     // cfg.insert("seed", "123");
     // cfg.insert("a", "6364136223846793005");
