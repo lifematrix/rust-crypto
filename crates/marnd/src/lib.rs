@@ -15,3 +15,5 @@ pub(crate) mod lcg {
 pub mod entropy {
     pub mod mosentropy;
 }
+
+pub use crate::entropy::mosentropy::{MOSEntropy, MOSRng};

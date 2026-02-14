@@ -1,21 +1,13 @@
 use std::io;
-use std::io::{Err, ErrorKind};
+use std::result::Result::Err;
+use std::io::{Error, ErrorKind};
 
 pub trait MOSEntropy {
-    fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()> {
-        use std::env;
-        Err(Err::new(
-            ErrorKind::Unsupported, 
-            "{} is not implemented for the target OS '{}' of family '{}' on architecture '{}'",
-            env::consts::OS,
-            env::consts::FAMILY,
-            env::consts::ARCH
-        ))
-    }
+    fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()>;
 
     fn next_u64(&mut self) -> io::Result<u64> {
         let mut buf = [0u8; 8];
-        self.fill_bytes(&mut b)?;
+        self.fill_bytes(&mut buf)?;
         Ok(u64::from_ne_bytes(buf))
     }
 
@@ -26,12 +18,14 @@ pub trait MOSEntropy {
     }
 }
 
+ pub struct MOSRng;
 // pub struct MOSRng {
 //     #[cfg(any(target_os = "macos", target_os = "linux"))]
 //     handle: File,
 // }
 
-#[cfg(any(target_os = "macos", target_os = "linux"))]
+//#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[cfg(any(target_os = "macos"))]
 impl MOSEntropy for MOSRng {
     fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()> {
         use std::fs::File;
@@ -41,4 +35,22 @@ impl MOSEntropy for MOSRng {
         f.read_exact(out)?;
         Ok(())
     } 
+}
+
+#[cfg(not(any(target_os = "macos")))]
+impl MOSEntropy for MOSRng {
+    fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()> {
+        use std::env;
+        Err(Error::new(
+            ErrorKind::Unsupported, 
+            format!("{} is not implemented for the target OS '{}' of family '{}' on architecture '{}'",
+                std::any::type_name::<Self>()
+                    .rsplit("::")
+                    .next()
+                    .unwrap(),
+                env::consts::OS,
+                env::consts::FAMILY,
+                env::consts::ARCH)
+        ))
+    }
 }
