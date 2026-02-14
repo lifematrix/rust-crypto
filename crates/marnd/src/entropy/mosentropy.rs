@@ -24,8 +24,8 @@ pub trait MOSEntropy {
 //     handle: File,
 // }
 
-//#[cfg(any(target_os = "macos", target_os = "linux"))]
-#[cfg(any(target_os = "macos"))]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+//#[cfg(any(target_os = "macos"))]
 impl MOSEntropy for MOSRng {
     fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()> {
         use std::fs::File;
@@ -37,7 +37,7 @@ impl MOSEntropy for MOSRng {
     } 
 }
 
-#[cfg(not(any(target_os = "macos")))]
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
 impl MOSEntropy for MOSRng {
     fn fill_bytes(&mut self, out: &mut [u8]) -> io::Result<()> {
         use std::env;
