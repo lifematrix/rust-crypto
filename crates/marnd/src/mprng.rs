@@ -72,25 +72,17 @@ pub trait MPRngExt: MPRng {
 
         #[cfg(debug_assertions)]
         {
-            let probs_debug_str = if probs.len() <= 3 {
-                format!("[{}]", probs.iter().map(|p| format!("{p}")).collect::<Vec<_>>().join(", "))
-            } else {
-                format!("[{}, {}, ..., {}]", 
-                    probs[0],
-                    probs[1],
-                    probs[probs.len() - 1]
-                )
-            };
+            use marcore::{f64_isclose, fmt_slice_debug};
 
             for (i, &p) in probs.iter().enumerate() {
                 if p < 0.0 || p > 1.0 {
-                    panic!("Invalid probability at index {i}: {p:.12}. Probs: {probs_debug_str}");
+                    panic!("Invalid probability at index {i}: {p:.12}. Probs: {}", fmt_slice_debug!(probs));
                 } 
             }
 
             let sum_p = probs.iter().sum::<f64>();
-            if (sum_p - 1.0).abs() >= 1e-12 {
-                panic!("sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {probs_debug_str}");
+            if !f64_isclose!(sum_p, 1.0) {
+                panic!("sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {}", fmt_slice_debug!(probs));
             }
         }
 
@@ -110,7 +102,7 @@ pub trait MPRngExt: MPRng {
         assert_eq!(
             elements.len(),
             probs.len(),
-            "elements and probs must have same length"
+            "The elements and probs must have same length"
         );
         &elements[self.choice_idx(probs)]
     }

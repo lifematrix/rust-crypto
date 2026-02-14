@@ -11,3 +11,7 @@ pub use crate::mprng::MPRngExt;
 pub(crate) mod lcg {
     pub(crate) mod lcg64;
 }
+
+pub mod entropy {
+    pub mod mosentropy;
+}

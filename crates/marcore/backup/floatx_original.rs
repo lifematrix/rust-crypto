@@ -238,6 +238,7 @@ impl FloatX for f32 {
 //         )
 //     }};
 // }
+
 #[macro_export]
 macro_rules! define_isclose_macro {
     ($ty:ty) => {
@@ -246,8 +247,8 @@ macro_rules! define_isclose_macro {
             macro_rules! [<$ty _isclose>] {
                 // 2 args
                 ($a:expr, $b:expr) => {{
-                    use $crate::FloatX;
-                    ($a as $ty).isclose(
+                    use $crate::floatx::FloatX;
+                    ($a as $ty).is_close(
                         &($b as $ty),
                         <$ty as FloatX>::DEFAULT_REL_TOL,
                         <$ty as FloatX>::DEFAULT_ABS_TOL,
@@ -256,8 +257,8 @@ macro_rules! define_isclose_macro {
 
                 // 3 args
                 ($a:expr, $b:expr, $rel:expr) => {{
-                    use $crate::FloatX;
-                    ($a as $ty).isclose(
+                    use $crate::floatx::FloatX;
+                    ($a as $ty).is_close(
                         &($b as $ty),
                         $rel as $ty,
                         <$ty as FloatX>::DEFAULT_ABS_TOL,
@@ -266,8 +267,8 @@ macro_rules! define_isclose_macro {
 
                 // 4 args
                 ($a:expr, $b:expr, $rel:expr, $abs:expr) => {{
-                    use $crate::FloatX;
-                    ($a as $ty).isclose(
+                    use $crate::floatx::FloatX;
+                    ($a as $ty).is_close(
                         &($b as $ty),
                         $rel as $ty,
                         $abs as $ty,
@@ -277,8 +278,3 @@ macro_rules! define_isclose_macro {
         }
     };
 }
-
-
-define_isclose_macro!(f32);
-define_isclose_macro!(f64);
-
