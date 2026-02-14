@@ -103,7 +103,7 @@
         //     };
         // }
 
-use core::ops::{Sub, Mul};
+use std::ops::{Sub, Mul};
 
 pub trait FloatX: Sized + Copy + PartialOrd 
             + Sub<Output = Self> + Mul<Output = Self> {

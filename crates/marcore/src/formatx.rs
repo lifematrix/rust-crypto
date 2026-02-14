@@ -1,4 +1,4 @@
-use core::fmt::Display;
+use std::fmt::Display;
 
 const DEFAULT_ITEMS_DISPLAY: usize = 3;
 
