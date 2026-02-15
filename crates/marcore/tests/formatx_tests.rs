@@ -1,5 +1,5 @@
-use marcore::formatx::fmt_slice_compact;
 use marcore::fmt_slice_debug;
+use marcore::formatx::fmt_slice_compact;
 
 #[test]
 fn empty_slice_default() {

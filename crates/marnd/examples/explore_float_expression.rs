@@ -1,4 +1,3 @@
-
 fn format_f32_exp(exp: u16) -> String {
     if exp > 127 {
         format!("{:08b}", exp - 127)
@@ -15,11 +14,13 @@ fn parse_f32(d: f32) {
 
     println!("the number : {}, bits: {:032b}", d, bits);
     println!("sign: {:b}", sign);
-    println!("exponent: {:08b}, {} without bias", exponent, format_f32_exp(exponent));
+    println!(
+        "exponent: {:08b}, {} without bias",
+        exponent,
+        format_f32_exp(exponent)
+    );
     println!("fraction: {:023b}", fraction);
-
 }
-
 
 fn format_f64_exp(exp: u16) -> String {
     if exp > 1023 {
@@ -37,9 +38,12 @@ fn parse_f64(d: f64) {
 
     println!("the number : {}, bits: {:064b}", d, bits);
     println!("sign: {:b}", sign);
-    println!("exponent: {:011b}, {} without bias", exponent, format_f64_exp(exponent));
+    println!(
+        "exponent: {:011b}, {} without bias",
+        exponent,
+        format_f64_exp(exponent)
+    );
     println!("fraction: {:052b}", fraction);
-
 }
 
 // fn main() {
@@ -88,7 +92,7 @@ fn main() {
         println!("max of u64 = {x:x}");
         for i in 0..64 {
             println!("{}", "~".repeat(80));
-            let x1 = x >> i; 
+            let x1 = x >> i;
             let y1 = x1 as f64;
             let y2 = y1 as u64;
             let eq = x1 == y2;

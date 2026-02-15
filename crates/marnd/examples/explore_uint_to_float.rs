@@ -1,6 +1,6 @@
 // #![feature(f128)]
 
-use marnd::{MPCfg, MPBuilder, MPRng};
+use marnd::{MPBuilder, MPCfg, MPRng};
 
 fn main() {
     let mut cfg = MPCfg::new();
@@ -22,7 +22,7 @@ fn main() {
         // ffffffffffffffff
         println!("max of u64 = {x:x}");
         for i in 0..64 {
-            let x1 = x >> i; 
+            let x1 = x >> i;
             let y1 = x1 as f64;
             let y2 = y1 as u64;
             let eq = x1 == y2;
@@ -42,7 +42,7 @@ fn main() {
         // ffffffff
         println!("max of u32 = {x:x}");
         for i in 0..32 {
-            let x1 = x >> i; 
+            let x1 = x >> i;
             let y1 = x1 as f32;
             let y2 = y1 as u32;
             let eq = x1 == y2;
@@ -55,7 +55,7 @@ fn main() {
     //     // ffffffff
     //     println!("max of u128 = {x:x}");
     //     for i in 0..128 {
-    //         let x1 = x >> i; 
+    //         let x1 = x >> i;
     //         let y1 = x1 as f128;
     //         let y2 = y1 as u128;
     //         let eq = x1 == y2;

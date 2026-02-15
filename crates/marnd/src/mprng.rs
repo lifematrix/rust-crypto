@@ -28,7 +28,6 @@ pub trait MPRng {
         (self.next_u64() >> 63) != 0
     }
 
-
     // fn choice<'aa, T>(&mut self, elements: &'aa [T], probs: &[f64]) -> &'aa T {
     //     let idx = self.choice_idx(probs);
     //     &elements[idx]
@@ -67,7 +66,7 @@ pub trait MPRng {
 pub trait MPRngExt: MPRng {
     fn choice_idx(&mut self, probs: &[f64]) -> usize {
         if probs.is_empty() {
-            return 0; 
+            return 0;
         }
 
         #[cfg(debug_assertions)]
@@ -76,18 +75,24 @@ pub trait MPRngExt: MPRng {
 
             for (i, &p) in probs.iter().enumerate() {
                 if p < 0.0 || p > 1.0 {
-                    panic!("Invalid probability at index {i}: {p:.12}. Probs: {}", fmt_slice_debug!(probs));
-                } 
+                    panic!(
+                        "Invalid probability at index {i}: {p:.12}. Probs: {}",
+                        fmt_slice_debug!(probs)
+                    );
+                }
             }
 
             let sum_p = probs.iter().sum::<f64>();
             if !f64_isclose!(sum_p, 1.0) {
-                panic!("sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {}", fmt_slice_debug!(probs));
+                panic!(
+                    "sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {}",
+                    fmt_slice_debug!(probs)
+                );
             }
         }
 
-        let mut cum_p = 0.0;   // cumulative probability
-        let target_p = self.next_f64();  
+        let mut cum_p = 0.0; // cumulative probability
+        let target_p = self.next_f64();
 
         for (i, &p) in probs.iter().enumerate() {
             cum_p += p;

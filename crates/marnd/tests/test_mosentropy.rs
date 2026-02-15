@@ -32,7 +32,10 @@ fn mosrng_next_u64_and_seed256_succeed() {
 
     assert!(n <= u64::MAX);
     assert_eq!(seed.len(), 32);
-    assert!(seed.iter().any(|&b| b != 0), "unexpected all-zero 256-bit seed");
+    assert!(
+        seed.iter().any(|&b| b != 0),
+        "unexpected all-zero 256-bit seed"
+    );
 }
 
 #[test]

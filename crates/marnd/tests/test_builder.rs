@@ -30,7 +30,9 @@ fn build_lcg64_variant_b_with_seed_uses_b_constants() {
     cfg.insert("seed", "1");
 
     let mut rng = MPBuilder::build("Lcg64::B", Some(cfg)).expect("build lcg64::b");
-    let expected = 1u64.wrapping_mul(2862933555777941757).wrapping_add(3037000493);
+    let expected = 1u64
+        .wrapping_mul(2862933555777941757)
+        .wrapping_add(3037000493);
     assert_eq!(rng.next_u64(), expected);
 }
 

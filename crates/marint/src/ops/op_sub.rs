@@ -1,12 +1,14 @@
-use std::ops::{Sub, SubAssign};
-use std::cmp::Ordering;
 use crate::MarInt;
+use std::cmp::Ordering;
+use std::ops::{Sub, SubAssign};
 
 impl MarInt {
     pub fn sub_limbs(a: &[u64], b: &[u64], with_normalize: bool) -> Vec<u64> {
         debug_assert!(
             Self::cmp_limbs(a, b) != Ordering::Less,
-            "sub_limbs: first operand must be >= the second one! a = {:?}, b = {:?}", a, b
+            "sub_limbs: first operand must be >= the second one! a = {:?}, b = {:?}",
+            a,
+            b
         );
 
         let mut result = Vec::with_capacity(a.len());
@@ -19,8 +21,7 @@ impl MarInt {
             subtrahend = b[i] as u128 + borrow as u128;
             if minuend >= subtrahend {
                 borrow = 0;
-            }
-            else {
+            } else {
                 minuend += Self::LIMB_BASE;
                 borrow = 1;
             }
@@ -35,15 +36,13 @@ impl MarInt {
 
                 if minuend >= subtrahend {
                     borrow = 0;
-                }
-                else {
+                } else {
                     minuend += Self::LIMB_BASE;
                     borrow = 1;
                 }
                 let difference = minuend - subtrahend;
                 result.push(difference as u64);
-            }
-            else {
+            } else {
                 result.push(a[i]);
             }
         }

@@ -1,15 +1,15 @@
 // tests/div_rem_ops.rs
 
-use rand::{RngCore, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{RngCore, SeedableRng};
 
 use num_bigint::BigInt;
-use num_traits::{Zero, Signed, ToPrimitive};
+use num_traits::{Signed, ToPrimitive, Zero};
 
 // Change this to your actual crate/module path.
 use marint::marint::MarInt;
 use marint::sign::MSgn;
-use marint::sign::MSgn::{MNeg, MZero, MPos};
+use marint::sign::MSgn::{MNeg, MPos, MZero};
 
 fn assert_normalized_le(limbs: &[u64]) {
     assert!(!limbs.is_empty(), "limbs must not be empty");
@@ -39,7 +39,10 @@ fn marint_to_bigint(x: &MarInt) -> BigInt {
 /// Convert BigInt -> MarInt (sign + LE u64 limbs), normalized.
 fn bigint_to_marint(x: &BigInt) -> MarInt {
     if x.is_zero() {
-        return MarInt { sign: MZero, limbs: vec![0] };
+        return MarInt {
+            sign: MZero,
+            limbs: vec![0],
+        };
     }
     let sign = if x.is_negative() { MNeg } else { MPos };
     let (_s, bytes) = x.abs().to_bytes_le();
@@ -137,11 +140,23 @@ fn check_div_rem_case(a: &MarInt, b: &MarInt) {
     let q_expected = bigint_to_marint(&q_bi);
     let r_expected = bigint_to_marint(&r_bi);
 
-    assert_eq!(q.sign, q_expected.sign, "quot sign mismatch: a={a_bi} b={b_bi}");
-    assert_eq!(q.limbs, q_expected.limbs, "quot limbs mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(
+        q.sign, q_expected.sign,
+        "quot sign mismatch: a={a_bi} b={b_bi}"
+    );
+    assert_eq!(
+        q.limbs, q_expected.limbs,
+        "quot limbs mismatch: a={a_bi} b={b_bi}"
+    );
 
-    assert_eq!(r.sign, r_expected.sign, "rem sign mismatch: a={a_bi} b={b_bi}");
-    assert_eq!(r.limbs, r_expected.limbs, "rem limbs mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(
+        r.sign, r_expected.sign,
+        "rem sign mismatch: a={a_bi} b={b_bi}"
+    );
+    assert_eq!(
+        r.limbs, r_expected.limbs,
+        "rem limbs mismatch: a={a_bi} b={b_bi}"
+    );
 
     // Reconstruction property (also as a sanity check): a = q*b + r
     let recon = marint_to_bigint(&q) * &b_bi + marint_to_bigint(&r);
@@ -150,7 +165,10 @@ fn check_div_rem_case(a: &MarInt, b: &MarInt) {
     // Remainder magnitude constraint: |r| < |b|
     let rb = marint_to_bigint(&r).abs();
     let bb = b_bi.abs();
-    assert!(rb < bb, "remainder magnitude not < divisor: |r|={rb} |b|={bb}");
+    assert!(
+        rb < bb,
+        "remainder magnitude not < divisor: |r|={rb} |b|={bb}"
+    );
 }
 
 fn check_div_rem_euclid_case(a: &MarInt, b: &MarInt) {
@@ -178,10 +196,22 @@ fn check_div_rem_euclid_case(a: &MarInt, b: &MarInt) {
     let q_expected = bigint_to_marint(&q_bi);
     let r_expected = bigint_to_marint(&r_bi);
 
-    assert_eq!(q.sign, q_expected.sign, "euclid quot sign mismatch: a={a_bi} b={b_bi}");
-    assert_eq!(q.limbs, q_expected.limbs, "euclid quot limbs mismatch: a={a_bi} b={b_bi}");
-    assert_eq!(r.sign, r_expected.sign, "euclid rem sign mismatch: a={a_bi} b={b_bi}");
-    assert_eq!(r.limbs, r_expected.limbs, "euclid rem limbs mismatch: a={a_bi} b={b_bi}");
+    assert_eq!(
+        q.sign, q_expected.sign,
+        "euclid quot sign mismatch: a={a_bi} b={b_bi}"
+    );
+    assert_eq!(
+        q.limbs, q_expected.limbs,
+        "euclid quot limbs mismatch: a={a_bi} b={b_bi}"
+    );
+    assert_eq!(
+        r.sign, r_expected.sign,
+        "euclid rem sign mismatch: a={a_bi} b={b_bi}"
+    );
+    assert_eq!(
+        r.limbs, r_expected.limbs,
+        "euclid rem limbs mismatch: a={a_bi} b={b_bi}"
+    );
 
     // Reconstruction property: a = q*b + r
     let recon = marint_to_bigint(&q) * &b_bi + marint_to_bigint(&r);
@@ -209,7 +239,9 @@ fn div_rem_small_known_values() {
     ];
 
     for &(a, b) in cases {
-        if b == 0 { continue; }
+        if b == 0 {
+            continue;
+        }
         let aa = MarInt::from_i128(a);
         let bb = MarInt::from_i128(b);
         check_div_rem_case(&aa, &bb);
@@ -282,7 +314,9 @@ fn div_rem_euclid_small_known_values() {
     ];
 
     for &(a, b) in cases {
-        if b == 0 { continue; }
+        if b == 0 {
+            continue;
+        }
         let aa = MarInt::from_i128(a);
         let bb = MarInt::from_i128(b);
         check_div_rem_euclid_case(&aa, &bb);

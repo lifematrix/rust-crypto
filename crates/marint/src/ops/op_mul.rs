@@ -1,7 +1,7 @@
-use std::ops::{Mul, MulAssign};
-use std::cmp::Ordering;
-use crate::MarInt;
 use crate::MSgn::*;
+use crate::MarInt;
+use std::cmp::Ordering;
+use std::ops::{Mul, MulAssign};
 
 impl MarInt {
     /// Multiply magnitudes (little-endian u64 limbs), returning magnitude limbs.
@@ -128,20 +128,20 @@ impl MarInt {
     pub fn limbs_mul_by_u64(limbs: &[u64], u: u64) -> Vec<u64> {
         let mut result = Vec::with_capacity(limbs.len() + 1);
         let mut carry: u64 = 0;
-    
+
         for &digit in limbs.iter() {
             let m = digit as u128 * u as u128 + carry as u128; // Multiply and add carry
             let (ml, mh) = Self::split_u128(m);
             result.push(ml); // Push lower part
             carry = mh as u64; // Carry is the upper part
         }
-    
+
         if carry != 0 {
             result.push(carry as u64);
         }
 
         Self::normalize_limbs(&mut result);
-    
+
         result
-    }    
+    }
 }

@@ -1,4 +1,3 @@
-
 #[cfg(test)]
 mod tests {
     use marint::MSgn::*;
@@ -80,11 +79,17 @@ mod tests {
                     // Here, since input is 2 limbs and we add u64, output is at most 3 limbs,
                     // but it still fits in u128 only if the 3rd limb is 0.
                     let mut gval: u128 = 0;
-                    if got.len() >= 1 { gval += got[0] as u128; }
-                    if got.len() >= 2 { gval += (got[1] as u128) << 64; }
+                    if got.len() >= 1 {
+                        gval += got[0] as u128;
+                    }
+                    if got.len() >= 2 {
+                        gval += (got[1] as u128) << 64;
+                    }
                     if got.len() >= 3 {
                         // if third limb is non-zero, u128 overflow would happen, skip this check
-                        if got[2] != 0 { continue; }
+                        if got[2] != 0 {
+                            continue;
+                        }
                     }
 
                     let expected = aval + (add as u128);
@@ -131,7 +136,10 @@ mod tests {
 
     #[test]
     fn test_limbs_mul_by_u64_multi_limb_carry_propagation() {
-        println!("\x1b[34mDEBUG\x1b[0m Testing is here {}", "test_limbs_mul_by_u64_multi_limb_carry_propagation");
+        println!(
+            "\x1b[34mDEBUG\x1b[0m Testing is here {}",
+            "test_limbs_mul_by_u64_multi_limb_carry_propagation"
+        );
 
         // [u64::MAX, u64::MAX] represents (2^128 - 1)
         // (2^128 - 1) * 2 = 2^129 - 2 => [u64::MAX - 1, u64::MAX, 1]
@@ -161,7 +169,12 @@ mod tests {
         for (limbs, mul) in cases {
             let result = MarInt::limbs_mul_by_u64(limbs, mul);
             assert!(!result.is_empty(), "result must not be empty");
-            assert!(is_canonical(&result), "not canonical: {:?} (mul={})", result, mul);
+            assert!(
+                is_canonical(&result),
+                "not canonical: {:?} (mul={})",
+                result,
+                mul
+            );
         }
     }
 
@@ -182,8 +195,12 @@ mod tests {
                     // Convert result back into u128 if it fits (i.e. at most 2 limbs)
                     // If a 3rd limb appears and is non-zero, u128 can't represent it; skip.
                     let mut gval: u128 = 0;
-                    if got.len() >= 1 { gval += got[0] as u128; }
-                    if got.len() >= 2 { gval += (got[1] as u128) << 64; }
+                    if got.len() >= 1 {
+                        gval += got[0] as u128;
+                    }
+                    if got.len() >= 2 {
+                        gval += (got[1] as u128) << 64;
+                    }
                     if got.len() >= 3 {
                         if got[2] != 0 {
                             continue;
@@ -207,15 +224,23 @@ mod tests {
         mi.limbs.len() >= 1 && *mi.limbs.last().unwrap() != 0
     }
 
-
     fn mi_pos(limbs: &[u64]) -> MarInt {
-        MarInt { sign: MPos, limbs: limbs.to_vec() }
+        MarInt {
+            sign: MPos,
+            limbs: limbs.to_vec(),
+        }
     }
     fn mi_neg(limbs: &[u64]) -> MarInt {
-        MarInt { sign: MNeg, limbs: limbs.to_vec() }
+        MarInt {
+            sign: MNeg,
+            limbs: limbs.to_vec(),
+        }
     }
     fn mi_zero() -> MarInt {
-        MarInt { sign: MZero, limbs: MarInt::limbs_zero() }
+        MarInt {
+            sign: MZero,
+            limbs: MarInt::limbs_zero(),
+        }
     }
 
     // Convert a small MarInt (<=2 limbs) to i128 for cross-check tests.
@@ -224,17 +249,29 @@ mod tests {
             return None;
         }
         let mut mag: u128 = 0;
-        if mi.limbs.len() >= 1 { mag += mi.limbs[0] as u128; }
-        if mi.limbs.len() == 2 { mag += (mi.limbs[1] as u128) << 64; }
+        if mi.limbs.len() >= 1 {
+            mag += mi.limbs[0] as u128;
+        }
+        if mi.limbs.len() == 2 {
+            mag += (mi.limbs[1] as u128) << 64;
+        }
 
         match mi.sign {
             MZero => Some(0),
             MPos => {
-                if mag <= i128::MAX as u128 { Some(mag as i128) } else { None }
+                if mag <= i128::MAX as u128 {
+                    Some(mag as i128)
+                } else {
+                    None
+                }
             }
             MNeg => {
                 // allow -i128::MAX..-1; disallow magnitude > i128::MAX+1 etc.
-                if mag <= (i128::MAX as u128) + 1 { Some(-(mag as i128)) } else { None }
+                if mag <= (i128::MAX as u128) + 1 {
+                    Some(-(mag as i128))
+                } else {
+                    None
+                }
             }
         }
     }
@@ -289,7 +326,7 @@ mod tests {
     fn test_add_equal_magnitude_opposite_sign_is_zero() {
         let a = mi_pos(&[123456]);
         //let b = mi_neg(&[123456]);
-        let b= -a.clone();
+        let b = -a.clone();
         let c = a + b;
 
         assert_eq!(c.sign, MZero);
@@ -389,7 +426,10 @@ mod tests {
         let b = mi_pos(&[0, 1]); // 2^64
         let c = a * b;
         assert_eq!(c.sign, MPos);
-        println!("\x1b[34mDEBUG\x1b[0m [test_mul_multi_limb_known_values] c.limbs = {:?}", c.limbs);
+        println!(
+            "\x1b[34mDEBUG\x1b[0m [test_mul_multi_limb_known_values] c.limbs = {:?}",
+            c.limbs
+        );
         assert_eq!(c.limbs, vec![0, 0, 1]);
         assert!(is_valid(&c));
 
@@ -429,7 +469,17 @@ mod tests {
         // Cross-check against i128 for small numbers parsed from decimal strings.
         // This uses your FromStr implementation if present; otherwise, build from limbs manually.
         let vals: [i128; 15] = [
-            -1000, -123, -7, -2, -1, 0, 1, 2, 7, 123, 999,
+            -1000,
+            -123,
+            -7,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            7,
+            123,
+            999,
             (1i128 << 31) - 1,
             -((1i128 << 31) - 1),
             (1i128 << 63) - 1,
@@ -610,7 +660,17 @@ mod tests {
     #[test]
     fn test_sub_matches_i128_for_small_values() {
         let vals: [i128; 15] = [
-            -1000, -123, -7, -2, -1, 0, 1, 2, 7, 123, 999,
+            -1000,
+            -123,
+            -7,
+            -2,
+            -1,
+            0,
+            1,
+            2,
+            7,
+            123,
+            999,
             (1i128 << 31) - 1,
             -((1i128 << 31) - 1),
             (1i128 << 63) - 1,
@@ -649,7 +709,11 @@ mod tests {
         for a in &vals {
             for b in &vals {
                 let left = a.clone() - b.clone();
-                let right = a.clone() + (MarInt { sign: -b.sign, limbs: b.limbs.clone() }); // if you implement Neg, prefer -b.clone()
+                let right = a.clone()
+                    + (MarInt {
+                        sign: -b.sign,
+                        limbs: b.limbs.clone(),
+                    }); // if you implement Neg, prefer -b.clone()
                 assert_eq!(left.sign, right.sign, "a={:?}, b={:?}", a, b);
                 assert_eq!(left.limbs, right.limbs, "a={:?}, b={:?}", a, b);
                 assert!(is_valid(&left));

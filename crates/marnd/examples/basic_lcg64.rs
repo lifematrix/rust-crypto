@@ -1,7 +1,11 @@
-use marnd::{MPCfg, MPBuilder, MPRng};
+use marnd::{MPBuilder, MPCfg, MPRng};
 
 fn main() {
-    println!("infinity: {}, {}", f32::INFINITY== f32::INFINITY, f32::NEG_INFINITY==f32::NEG_INFINITY);
+    println!(
+        "infinity: {}, {}",
+        f32::INFINITY == f32::INFINITY,
+        f32::NEG_INFINITY == f32::NEG_INFINITY
+    );
     let mut cfg = MPCfg::new();
     // cfg.insert("seed", "123");
     // cfg.insert("a", "6364136223846793005");
@@ -18,6 +22,6 @@ fn main() {
     println!("u64={r64} u32={r32} f64={rf64} f32={rf32} bool={rb}");
 
     for _ in 0..100 {
-        println!("{}", rng.next_u64() >> 60); 
+        println!("{}", rng.next_u64() >> 60);
     }
 }

@@ -1,8 +1,6 @@
-use std::cmp::Ordering;
 use crate::sign::MSgn;
-use crate::sign::MSgn::{MPos, MNeg, MZero};
-
-
+use crate::sign::MSgn::{MNeg, MPos, MZero};
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone)]
 pub struct MarInt {
@@ -37,20 +35,20 @@ impl MarInt {
         if value == 0 {
             return Self::zero();
         }
-        Self { sign: MPos, limbs: vec![value] }
+        Self {
+            sign: MPos,
+            limbs: vec![value],
+        }
     }
 
     #[inline]
     pub(crate) fn split_u128(value: u128) -> (u64, u64) {
-        let (lo, hi) = (
-            (value & 0xFFFF_FFFF_FFFF_FFFF) as u64,  
-            (value >> 64) as u64,                    
-        );
+        let (lo, hi) = ((value & 0xFFFF_FFFF_FFFF_FFFF) as u64, (value >> 64) as u64);
 
         (lo, hi)
     }
 
-    pub fn from_u128(value: u128) -> Self{
+    pub fn from_u128(value: u128) -> Self {
         let (low, high) = Self::split_u128(value);
         if value == 0 {
             return Self::zero();
@@ -58,13 +56,13 @@ impl MarInt {
 
         let limbs = if high != 0 {
             vec![low, high]
-        } else { 
+        } else {
             vec![low]
         };
 
         Self {
             sign: MPos,
-            limbs: limbs, 
+            limbs: limbs,
         }
     }
 
@@ -75,17 +73,18 @@ impl MarInt {
                 let mut x = Self::from_u128(1u128 << 127);
                 x.sign = MNeg;
                 x
-            } 
+            }
             _ => {
                 // safe because i128::MIN handled above
                 let mut x = Self::from_u128(value.abs() as u128);
-                if value < 0 { x.sign = MNeg; }
+                if value < 0 {
+                    x.sign = MNeg;
+                }
                 x
-            } 
+            }
         }
     }
 
-    
     #[inline]
     pub fn limbs_zero() -> Vec<u64> {
         vec![0]
@@ -111,8 +110,7 @@ impl MarInt {
     pub fn abs(&self) -> Self {
         if self.sign == MPos || self.sign == MZero {
             self.clone()
-        }
-        else {
+        } else {
             Self {
                 sign: MPos,
                 limbs: self.limbs.clone(),

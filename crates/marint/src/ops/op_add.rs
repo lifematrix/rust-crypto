@@ -1,7 +1,7 @@
-use std::ops::{Add, AddAssign};
-use std::cmp::Ordering;
 use crate::MarInt;
 use crate::sign::MSgn::*;
+use std::cmp::Ordering;
+use std::ops::{Add, AddAssign};
 
 impl MarInt {
     pub fn limbs_add_by_u64(limbs: &[u64], u: u64) -> Vec<u64> {
@@ -40,7 +40,7 @@ impl MarInt {
         let mut carry: u64 = 0;
         for i in 0..comm_len {
             let x: u128 = a[i] as u128 + b[i] as u128 + carry as u128;
-            let (low, high) = Self::split_u128(x);          
+            let (low, high) = Self::split_u128(x);
             result.push(low);
             carry = high;
         }
@@ -50,9 +50,8 @@ impl MarInt {
                 let x: u128 = longer_one[i] as u128 + carry as u128;
                 let (low, high) = Self::split_u128(x);
                 result.push(low);
-                carry = high;    
-            }
-            else {
+                carry = high;
+            } else {
                 result.push(longer_one[i]);
             }
         }
@@ -60,7 +59,7 @@ impl MarInt {
         if carry != 0 {
             result.push(carry);
         }
-        
+
         result
     }
 

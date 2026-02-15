@@ -1,8 +1,7 @@
-
 #[cfg(test)]
 mod test_shortdiv_limbs {
-    use marint::MSgn::*;
     use marint::MSgn;
+    use marint::MSgn::*;
     use marint::MarInt;
 
     fn limbs_from_u128(x: u128) -> Vec<u64> {
@@ -26,7 +25,10 @@ mod test_shortdiv_limbs {
 
     fn assert_normalized_le(limbs: &[u64]) {
         assert!(!limbs.is_empty(), "normalized limbs must not be empty");
-        assert!(limbs.len() == 1 || *limbs.last().unwrap() != 0, "no MS zero limbs");
+        assert!(
+            limbs.len() == 1 || *limbs.last().unwrap() != 0,
+            "no MS zero limbs"
+        );
     }
 
     #[test]
@@ -106,9 +108,7 @@ mod test_shortdiv_limbs {
             assert!(r < d);
 
             let q_u128 = u128_from_limbs(&q);
-            let recomposed = q_u128
-                .wrapping_mul(d as u128)
-                .wrapping_add(r as u128);
+            let recomposed = q_u128.wrapping_mul(d as u128).wrapping_add(r as u128);
 
             assert_eq!(recomposed, x, "recompose failed for x={x} d={d}");
         }

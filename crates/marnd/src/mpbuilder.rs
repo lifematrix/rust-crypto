@@ -1,6 +1,6 @@
+use crate::MPCfg;
 use crate::lcg::lcg64::Lcg64;
 use crate::mprng::MPRng;
-use crate::MPCfg;
 
 pub struct MPBuilder;
 

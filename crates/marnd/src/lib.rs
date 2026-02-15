@@ -1,10 +1,10 @@
-pub mod mpcfg;
 pub mod mpbuilder;
+pub mod mpcfg;
 pub mod mprng;
 
-pub use crate::mpcfg::MPCfg;
-pub use crate::mpbuilder::MPBuilder;
 pub use crate::mpbuilder::MBErr;
+pub use crate::mpbuilder::MPBuilder;
+pub use crate::mpcfg::MPCfg;
 pub use crate::mprng::MPRng;
 pub use crate::mprng::MPRngExt;
 
@@ -16,4 +16,4 @@ pub mod entropy {
     pub mod mosentropy;
 }
 
-pub use crate::entropy::mosentropy::{MOSEntropy, MOSRng};
+pub use crate::entropy::mosentropy::MOSEntropy;

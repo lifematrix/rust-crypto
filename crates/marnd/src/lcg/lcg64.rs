@@ -1,5 +1,5 @@
-use crate::mprng::MPRng;
 use crate::MPCfg;
+use crate::mprng::MPRng;
 
 pub struct Lcg64 {
     state: u64,

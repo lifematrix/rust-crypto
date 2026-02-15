@@ -1,6 +1,6 @@
-use std::ops::Neg;
-use crate::MarInt;
 use crate::MSgn::*;
+use crate::MarInt;
+use std::ops::Neg;
 
 /* -----------------------------
  * Neg

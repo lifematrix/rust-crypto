@@ -1,4 +1,3 @@
-
 #[repr(i8)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum MSgn {
@@ -20,7 +19,6 @@ impl core::ops::Neg for MSgn {
         }
     }
 }
-
 
 impl core::ops::Mul for MSgn {
     type Output = MSgn;

@@ -1,7 +1,6 @@
-use core::str::FromStr;
 use crate::marint::MarInt;
 use crate::sign::MSgn::*;
-
+use core::str::FromStr;
 
 const POW10: [u64; 20] = [
     1,
@@ -31,7 +30,6 @@ pub enum ParseMarIntError {
     Empty,
     InvalidChar(char),
 }
-
 
 impl FromStr for MarInt {
     type Err = ParseMarIntError;
@@ -63,12 +61,14 @@ impl FromStr for MarInt {
         // Skip leading zeros (but keep at least one digit)
         let digits = digits.trim_start_matches('0');
         if digits.is_empty() {
-            return Ok(MarInt { sign: MZero, limbs: vec![0] });
+            return Ok(MarInt {
+                sign: MZero,
+                limbs: vec![0],
+            });
         }
 
         // Parse in base 10^19 chunks
         const CHUNK: usize = 19;
-
 
         let mut limbs = MarInt::limbs_zero();
         let first_len = digits.len() % CHUNK;
@@ -90,10 +90,7 @@ impl FromStr for MarInt {
             pos += len;
         }
 
-        let mut result = MarInt{
-            sign, 
-            limbs
-        };
+        let mut result = MarInt { sign, limbs };
         result.normalize();
         Ok(result)
     }

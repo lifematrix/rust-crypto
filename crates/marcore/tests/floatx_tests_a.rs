@@ -1,6 +1,6 @@
-use marcore::floatx::*;
 use marcore::FloatX;
-use marcore::{f64_isclose, f32_isclose};
+use marcore::floatx::*;
+use marcore::{f32_isclose, f64_isclose};
 
 #[test]
 fn f64_basic_equality() {
@@ -78,8 +78,10 @@ fn macro_matches_impl() {
 
     assert_eq!(
         f64_isclose!(a, b),
-        (a as f64).isclose(&b,
+        (a as f64).isclose(
+            &b,
             <f64 as FloatX>::DEFAULT_REL_TOL,
-            <f64 as FloatX>::DEFAULT_ABS_TOL)
+            <f64 as FloatX>::DEFAULT_ABS_TOL
+        )
     );
 }

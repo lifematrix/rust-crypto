@@ -1,5 +1,5 @@
 use marcore::floatx::FloatX;
-use marcore::{f64_isclose, f32_isclose};
+use marcore::{f32_isclose, f64_isclose};
 
 /// ===== f64 basic behavior =====
 
@@ -15,7 +15,7 @@ fn f64_basic_default() {
 #[test]
 fn f64_exact_equality() {
     assert!(f64_isclose!(1.0, 1.0));
-    assert!(f64_isclose!(0.0, -0.0));   // signed zero
+    assert!(f64_isclose!(0.0, -0.0)); // signed zero
 }
 
 #[test]
@@ -38,10 +38,10 @@ fn f64_infinity_rules() {
 fn f64_relative_region() {
     // large magnitude: relative tolerance dominates
     let a = 1e9;
-    let b = a + 0.5;   // within 1e-9 * 1e9 = 1.0
+    let b = a + 0.5; // within 1e-9 * 1e9 = 1.0
     assert!(f64_isclose!(a, b));
 
-    let c = a + 2.0;   // outside tolerance
+    let c = a + 2.0; // outside tolerance
     assert!(!f64_isclose!(a, c));
 }
 
@@ -101,9 +101,11 @@ fn trait_vs_macro_consistency_f64() {
     let a = 1.23456789;
     let b = 1.23456780;
 
-    let via_trait = a.isclose(&b,
+    let via_trait = a.isclose(
+        &b,
         <f64 as FloatX>::DEFAULT_REL_TOL,
-        <f64 as FloatX>::DEFAULT_ABS_TOL);
+        <f64 as FloatX>::DEFAULT_ABS_TOL,
+    );
 
     let via_macro = f64_isclose!(a, b);
 

@@ -17,7 +17,6 @@ mod operators_ref_add_sub_tests {
     use marint::sign::MSgn;
     use marint::sign::MSgn::{MNeg, MPos, MZero};
 
-
     fn mk(sign: MSgn, limbs: Vec<u64>) -> MarInt {
         let mut x = MarInt { sign, limbs };
         x.normalize();
@@ -204,8 +203,8 @@ mod operators_ref_add_sub_tests {
 
     #[test]
     fn randomized_small_vectors_compare_with_i128_when_fit() {
-        use rand::{Rng, SeedableRng};
         use rand::rngs::StdRng;
+        use rand::{Rng, SeedableRng};
 
         let mut rng = StdRng::seed_from_u64(12345);
 

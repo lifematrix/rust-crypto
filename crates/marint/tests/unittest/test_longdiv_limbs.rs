@@ -150,15 +150,7 @@ mod test_longdiv_limbs {
             (1u128 << 127) - 1,
         ];
 
-        let b_vals: &[u128] = &[
-            1,
-            2,
-            4,
-            8,
-            1u128 << 16,
-            1u128 << 32,
-            1u128 << 63,
-        ];
+        let b_vals: &[u128] = &[1, 2, 4, 8, 1u128 << 16, 1u128 << 32, 1u128 << 63];
 
         for &a_u in a_vals {
             for &b_u in b_vals {
@@ -185,11 +177,15 @@ mod test_longdiv_limbs {
         let mut seed: u128 = 0xA5A5_5A5A_F0F0_0F0F_1234_5678_9ABC_DEF0;
 
         for _ in 0..300 {
-            seed = seed.wrapping_mul(6364136223846793005u128).wrapping_add(1442695040888963407u128);
+            seed = seed
+                .wrapping_mul(6364136223846793005u128)
+                .wrapping_add(1442695040888963407u128);
 
             let a_u = seed;
             let mut b_u = (seed >> 1) | 1; // make odd
-            if b_u == 0 { b_u = 3; }
+            if b_u == 0 {
+                b_u = 3;
+            }
 
             let a0 = limbs_from_u128(a_u);
             let b0 = limbs_from_u128(b_u);
@@ -214,13 +210,17 @@ mod test_longdiv_limbs {
         let mut seed: u128 = 0x0123_4567_89AB_CDEF_FEDC_BA98_7654_3210;
 
         for _ in 0..2000 {
-            seed = seed.wrapping_mul(2862933555777941757u128).wrapping_add(3037000493u128);
+            seed = seed
+                .wrapping_mul(2862933555777941757u128)
+                .wrapping_add(3037000493u128);
 
             let a_u = seed;
             let mut b_u = (seed >> 64) as u128;
-            b_u |= 1;          // ensure odd
-            b_u += 2;          // ensure >= 3
-            if b_u == 0 { b_u = 3; }
+            b_u |= 1; // ensure odd
+            b_u += 2; // ensure >= 3
+            if b_u == 0 {
+                b_u = 3;
+            }
 
             let a = limbs_from_u128(a_u);
             let b = limbs_from_u128(b_u);
