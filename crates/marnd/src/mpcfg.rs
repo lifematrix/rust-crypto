@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 use crate::MBErr;
+use std::simd::f32x4;
+
 
 #[derive(Clone, Debug, Default)]
 pub struct MPCfg {
