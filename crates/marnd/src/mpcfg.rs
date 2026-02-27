@@ -1,28 +1,38 @@
-use std::collections::HashMap;
 use crate::MRndErr;
+use std::collections::HashMap;
 use std::num::ParseIntError;
 
 pub struct CfgUtil;
 
 impl CfgUtil {
     /// Encapsulates u64 parsing logic (Decimal and Hex).
+    // pub fn parse_u64(s: &str) -> Result<u64, ParseIntError> {
+    //     if let Some(hex) = s.strip_prefix("0x").or_else(|| s.strip_prefix("0X")) {
+    //         u64::from_str_radix(hex, 16)
+    //     } else {
+    //         s.parse::<u64>()
+    //     }
+    // }
     pub fn parse_u64(s: &str) -> Result<u64, ParseIntError> {
+        let s = s.trim();
+
         if let Some(hex) = s.strip_prefix("0x").or_else(|| s.strip_prefix("0X")) {
-            u64::from_str_radix(hex, 16)
+            let cleaned = hex.replace('_', "");
+            u64::from_str_radix(&cleaned, 16)
         } else {
-            s.parse::<u64>()
+            let cleaned = s.replace('_', "");
+            cleaned.parse::<u64>()
         }
     }
 
     pub fn parse_schema(schema: &str) -> Result<(&str, Option<&str>), MRndErr> {
         let (engine, preset) = match schema.split_once("::") {
-            Some((e,p)) => (e.trim(), Some(p.trim())),
-            None => (schema, None)
+            Some((e, p)) => (e.trim(), Some(p.trim())),
+            None => (schema, None),
         };
 
         Ok((engine, preset))
     }
-    
 }
 
 #[derive(Clone, Debug, Default)]
@@ -50,19 +60,20 @@ impl MPCfg {
 
     pub fn get_str(&self, key: &str, required: bool) -> Result<Option<&str>, MRndErr> {
         match self.get(key) {
-            None =>  {
+            None => {
                 if required {
                     Err(MRndErr::BadCfg(format!("Missing key '{}'", key)))
-                }
-                else {
+                } else {
                     Ok(None)
                 }
             }
             Some(s) => {
                 if s.is_empty() {
-                    Err(MRndErr::BadCfg(format!("The value of key '{}' is empty", key)))
-                }
-                else {
+                    Err(MRndErr::BadCfg(format!(
+                        "The value of key '{}' is empty",
+                        key
+                    )))
+                } else {
                     Ok(Some(s))
                 }
             }
@@ -72,19 +83,16 @@ impl MPCfg {
     pub fn get_u64(&self, key: &str, required: bool) -> Result<Option<u64>, MRndErr> {
         let s = match self.get_str(key, required)? {
             Some(val) => val,
-            None => return Ok(None)
+            None => return Ok(None),
         };
 
-        CfgUtil::parse_u64(s).map(Some).map_err(|_| {
-            MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s))
-        })
+        CfgUtil::parse_u64(s)
+        .map(Some)
+        .map_err(|_| MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s)))
+        // CfgUtil::parse_u64(s)
+        //     .map_err(|_| MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s)))
+        //     .map(|x| {
+        //         println!("map some {}", x);
+        //         Some(x)})
     }
-
-    // pub fn get_u64_or(
-    //     &self,
-    //     key: &str,
-    //     default: u64,
-    // ) -> Result<u64, MRndErr> {
-    //     Ok(self.get_u64(key, false)?.unwrap_or(default))
-    // }
 }

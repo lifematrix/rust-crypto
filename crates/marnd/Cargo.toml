@@ -3,7 +3,16 @@ name = "marnd"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+legacy-tests = []
+
 [dependencies]
 marcore = { version="0.1.0", path = "../marcore" }
 thiserror = "2"
 
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "mprng_throughput"
+harness = false

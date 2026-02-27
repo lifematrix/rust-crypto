@@ -1,20 +1,21 @@
-pub mod error;
-pub mod mpcfg;
-pub mod mprng;
+pub(crate) mod error;
+pub(crate) mod mpcfg;
+pub(crate) mod mprng;
 
-
-pub mod entropy {
-    pub mod mosentropy;
+pub(crate) mod entropy {
+    pub(crate) mod mosentropy;
 }
 
 pub(crate) mod bitgen {
-    pub(crate) mod mbitgen;
     pub(crate) mod lcg64;
+    pub(crate) mod mbitgen;
 }
 
+pub(crate) use crate::bitgen::mbitgen::MBitGen;
+pub(crate) use crate::mpcfg::CfgUtil;
+
 pub use crate::bitgen::lcg64::Lcg64;
-pub use crate::error::MRndErr;
 pub use crate::entropy::mosentropy::MOSEntropy;
-pub use crate::mpcfg::CfgUtil;
+pub use crate::error::MRndErr;
 pub use crate::mpcfg::MPCfg;
-pub use crate::bitgen::mbitgen::MBitGen;
+pub use crate::mprng::MPRng;
