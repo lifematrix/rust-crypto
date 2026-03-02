@@ -1,0 +1,14 @@
+[package]
+name = "marnd_py"
+version = "0.1.1"
+edition = "2024"
+
+[lib]
+name = "marnd_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = {version = "0.22", features = ["extension-module"]}
+
+marcore = { version="0.1.0", path = "../marcore"}
+marnd = { version="0.1.0", path = "../marnd"}

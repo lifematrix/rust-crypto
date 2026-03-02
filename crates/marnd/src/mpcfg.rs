@@ -37,7 +37,7 @@ impl CfgUtil {
 
 #[derive(Clone, Debug, Default)]
 pub struct MPCfg {
-    c: HashMap<String, String>,
+    pub c: HashMap<String, String>,
 }
 
 impl MPCfg {
