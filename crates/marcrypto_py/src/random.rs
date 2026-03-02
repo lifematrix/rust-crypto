@@ -67,6 +67,14 @@ impl PyMPRng {
     pub fn next_u64(&mut self) -> u64 {
         self.inner.next_u64()
     }
+
+    pub fn next_f64(&mut self) -> f64 {
+        self.inner.next_f64()
+    }
+
+    pub fn next_f32(&mut self) -> f32 {
+        self.inner.next_f32()
+    }
 } 
 
 pub fn bind_submodule(m: &Bound<'_, PyModule>) -> PyResult<()>{

@@ -19,7 +19,7 @@ else
     exit 1
 fi
 
-python python/tests/test_marnd_py.py
+python python/tests/santity_check_marcrypto.py
 if [ $? -eq 0 ]; then
     echo "✅ Sanity check python package marcrypto OK!."
 else
