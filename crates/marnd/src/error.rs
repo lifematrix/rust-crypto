@@ -16,7 +16,7 @@ pub enum MRndErr {
     InvalidSchema(String),
 
     //#[error("config: Unkonwn BigGenerator Engine '{0}'")]
-    #[error("confg: The BigGenerator Engine {wrong_engine} is unknown and not supported. Available engines: {available:?}")]
+    #[error("config: The BigGenerator Engine {wrong_engine} is unknown and not supported. Available engines: {available:?}")]
     UnknownEngine{
         wrong_engine: String,
         available: Vec<&'static str>,

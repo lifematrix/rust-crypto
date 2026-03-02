@@ -1,3 +1,3 @@
 [workspace]
-members = ["crates/marcore","crates/marint", "crates/marnd", "crates/marnd_py", "crates/rsa"]
+members = ["crates/marcore","crates/marint", "crates/marnd", "crates/rsa", "crates/marcrypto_py"]
 resolver = "3"

@@ -38,7 +38,7 @@ impl MOSEntropy {
     pub fn next_u64() -> Result<u64, MRndErr> {
         let mut buf = [0u8; 8];
         Self::fill_bytes(&mut buf)?;
-        println!("MOSEnropy::next_u764 is called. return data {:?}", buf);
+        println!("MOSEnropy::next_u64 is called. return data {:?}", buf);
         Ok(u64::from_ne_bytes(buf))
     }
 

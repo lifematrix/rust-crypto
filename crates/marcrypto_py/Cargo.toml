@@ -1,10 +1,10 @@
 [package]
-name = "marnd_py"
+name = "marcrypto_py"
 version = "0.1.1"
 edition = "2024"
 
 [lib]
-name = "marnd_py"
+name = "marcrypto"
 crate-type = ["cdylib"]
 
 [dependencies]

@@ -11,9 +11,9 @@ set -uo pipefail
 
 python -m pip install -U maturin
 
-maturin develop -m crates/marnd_py/Cargo.toml
+maturin develop -m crates/marcrypto_py/Cargo.toml
 if [ $? -eq 0 ]; then
-    echo "✅ marnd_py built and installed into current Python environment."
+    echo "✅ The crate marcrypto is built and the package 'marcrypto' is installed into current Python environment."
 else
     echo "❌ Build failed."
     exit 1
@@ -21,7 +21,7 @@ fi
 
 python python/tests/test_marnd_py.py
 if [ $? -eq 0 ]; then
-    echo "✅ Sanity check python package marnd_py OK!."
+    echo "✅ Sanity check python package marcrypto OK!."
 else
     echo "❌ Python test failed."
     exit 1

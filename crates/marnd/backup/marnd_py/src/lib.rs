@@ -8,12 +8,6 @@ use pyo3::wrap_pyfunction;
 use marcore::pkg_version;
 use marnd::{MPCfg, MPRng, MRndErr};
 
-// impl From<MRndErr> for PyErr {
-//     fn from(e: MRndErr) -> PyErr {
-//         PyValueError::new_err(e.to_string())
-//     }
-// }
-
 fn mrnderr_to_py(e: MRndErr) -> PyErr {
     PyValueError::new_err(e.to_string())
 }
@@ -58,7 +52,7 @@ impl PyMPRng {
 } 
 
 #[pymodule]
-fn marnd_py(_py: Python<'_>, m: &Bound<'_,PyModule>) -> PyResult<()> {
+fn marcrypto(_py: Python<'_>, m: &Bound<'_,PyModule>) -> PyResult<()> {
     m.add("__version__", pkg_version!())?;
     m.add("__author__", "lifematrix")?;
     m.add_function(wrap_pyfunction!(create_rng, m)?)?;
