@@ -1,5 +1,6 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
+use pyo3::types::PySequence;
 use std::collections::HashMap;
 use marnd::{MPCfg, MPRng, MRndErr};
 
@@ -74,6 +75,32 @@ impl PyMPRng {
 
     pub fn next_f32(&mut self) -> f32 {
         self.inner.next_f32()
+    }
+
+    pub fn choice_idx(&mut self, probs: Vec<f64>) -> PyResult<usize> {
+        self.inner.choice_idx(&probs).map_err(mrnderr_to_py)
+    }
+
+    pub fn choice<'py>(&mut self, py: Python<'py>, elements: &Bound<'py, PyAny>, probs: Vec<f64>) -> PyResult<PyObject> {
+        let seq = elements.downcast::<PySequence>().map_err(|_| 
+            {PyValueError::new_err("elements must be a python sequence (e.g., list/tuple)")}
+        )?;
+
+        let n = seq.len()? as usize;
+
+        if n != probs.len() {
+            return Err(PyValueError::new_err(
+                "elements and probs must have same length",
+            ));
+        }
+    
+        // 3) use Rust RNG logic
+        let idx = self.inner.choice_idx(&probs).map_err(mrnderr_to_py)?;
+    
+        // 4) fetch Python element at that index
+        let item = seq.get_item(idx as usize)?;
+        Ok(item.into_py(py))
+
     }
 } 
 

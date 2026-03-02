@@ -1,5 +1,4 @@
 use core::fmt;
-use std::fmt::Formatter;
 use crate::{CfgUtil, Lcg64, MBitGen, MOSEntropy, MPCfg, MRndErr};
 use marcore::OptionExt;
 
@@ -106,31 +105,29 @@ impl MPRng {
 }
 
 impl MPRng {
-    pub fn choice_idx(&mut self, probs: &[f64]) -> usize {
+    pub fn choice_idx(&mut self, probs: &[f64]) -> Result<usize, MRndErr> {
         if probs.is_empty() {
-            return 0;
+            return Ok(0);
         }
 
-        #[cfg(debug_assertions)]
-        {
-            use marcore::{f64_isclose, fmt_slice_debug};
-
-            for (i, &p) in probs.iter().enumerate() {
-                if p < 0.0 || p > 1.0 {
-                    panic!(
+        use marcore::{f64_isclose, fmt_slice_debug};
+        for (i, &p) in probs.iter().enumerate() {
+            if p < 0.0 || p > 1.0 {
+                return Err(MRndErr::InvalidArgument(
+                    format!(
                         "Invalid probability at index {i}: {p:.12}. Probs: {}",
                         fmt_slice_debug!(probs)
-                    );
-                }
+                    )));
             }
+        }
 
-            let sum_p = probs.iter().sum::<f64>();
-            if !f64_isclose!(sum_p, 1.0) {
-                panic!(
+        let sum_p = probs.iter().sum::<f64>();
+        if !f64_isclose!(sum_p, 1.0) {
+            return Err(MRndErr::InvalidArgument(
+                format!(
                     "sum of probabilities must be 1.0 (got {sum_p:.12}). Probs: {}",
                     fmt_slice_debug!(probs)
-                );
-            }
+            )));
         }
 
         let mut cum_p = 0.0; // cumulative probability
@@ -139,18 +136,21 @@ impl MPRng {
         for (i, &p) in probs.iter().enumerate() {
             cum_p += p;
             if target_p < cum_p {
-                return i;
+                return Ok(i);
             }
         }
-        return probs.len() - 1;
+
+        Ok(probs.len() - 1)
     }
 
-    pub fn choice<'a, T>(&mut self, elements: &'a [T], probs: &[f64]) -> &'a T {
-        assert_eq!(
-            elements.len(),
-            probs.len(),
-            "The elements and probs must have same length"
-        );
-        &elements[self.choice_idx(probs)]
+    pub fn choice<'a, T>(&mut self, elements: &'a [T], probs: &[f64]) -> Result<&'a T, MRndErr> {
+        if elements.len() != probs.len() {
+            return Err(MRndErr::InvalidArgument(
+                String::from("The elements and probs must have same length")
+            ));
+        } 
+
+        let idx = self.choice_idx(probs)?;
+        Ok(&elements[idx])
     }
 }

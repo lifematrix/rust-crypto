@@ -41,4 +41,7 @@ pub enum MRndErr {
 
     #[error("internal error: {0}")]
     Internal(String),
+
+    #[error("invalid arguments: {0}")]
+    InvalidArgument(String)
 }
