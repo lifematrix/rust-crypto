@@ -102,6 +102,10 @@ impl PyMPRng {
         Ok(item.into_py(py))
 
     }
+
+    pub fn norm(&mut self) -> f64 {
+        self.inner.norm()
+    }
 } 
 
 pub fn bind_submodule(m: &Bound<'_, PyModule>) -> PyResult<()>{

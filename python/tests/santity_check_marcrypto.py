@@ -15,6 +15,9 @@ rng = mc.random.rng_dk();
 for i in range(10):
     print(f"#{i}, {rng.next_u64():x}")
 
+for i in range(100):
+    print(f"#{i}, {rng.norm()}")
+
 
 
 
