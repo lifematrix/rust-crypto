@@ -175,19 +175,16 @@ impl MPRng {
     // }
 
     pub fn norm(&mut self) -> f64 {
-        let mut r = self.next_f64();
-        let mut theta = self.next_f64();
-        let SCALE = 100_f64;
+        let mut t = -1.0*self.next_f64().ln();
+        let r = (2.0*t).sqrt();
 
+        let mut theta = self.next_f64();
         // pub const PI: f64 = 3.14159265358979323846264338327950288_f64; // 3.1415926535897931f64
         // pub const PI: f32 = 3.14159265358979323846264338327950288_f32; // 3.14159274f32
         theta = 2.0 * std::f64::consts::PI * theta;
-        r = (r+1.0)*SCALE; 
-        r = r.ln();
-        r = (2.0*r).sqrt();
 
         let f1 = r*theta.sin();
-        let f2 = r*theta.cos();
+        let _f2 = r*theta.cos();
 
         f1
     }
