@@ -7,11 +7,12 @@ pub struct MPRng {
     // bitgen: Box<dyn MBitGen>,
     pub bitgen: Box<dyn MBitGen>,
     pub gen_name: String,
+    pub spare_norm: Option<f64>
 }
 
 impl MPRng {
     pub fn new(bitgen: Box<dyn MBitGen>, gen_name: &str) -> Self {
-        Self { bitgen, gen_name: gen_name.into() }
+        Self { bitgen, gen_name: gen_name.into(), spare_norm: None }
     }
 
     pub fn build(cfg: &MPCfg) -> Result<Self, MRndErr> {
@@ -56,6 +57,11 @@ impl fmt::Display for MPRng {
     }
 }
 
+pub enum IntervalMode01 {
+    Closed0_Open1 = 0,  // [0,1)
+    Open0_Closed1 = 1,  // (0,1]
+}
+
 impl MPRng {
     /// Produce next 64 bits of output.
     pub fn next_u64(&mut self) -> u64 {
@@ -67,11 +73,20 @@ impl MPRng {
         (self.next_u64() >> 32) as u32
     }
 
-    /// Produce a random f64 in [0.0, 1.0).
-    pub fn next_f64(&mut self) -> f64 {
-        const SCALE: f64 = 1.0 / ((1u64 << 53) as f64);
-        let v = self.next_u64() >> 11;
+    #[inline]
+    pub fn next_f64_interval(&mut self, mode: IntervalMode01) -> f64 {
+        const SCALE: f64 = 1.0 / ((1u64 << f64::MANTISSA_DIGITS) as f64);
+        let v = (self.next_u64() >> (64 - f64::MANTISSA_DIGITS)) + (mode as u64);
         (v as f64) * SCALE
+    }
+
+    /// Produce a random f64 in [0.0, 1.0).
+    #[inline]
+    pub fn next_f64(&mut self) -> f64 {
+        // const SCALE: f64 = 1.0 / ((1u64 << 53) as f64);
+        // let v = self.next_u64() >> 11;
+        // (v as f64) * SCALE
+        self.next_f64_interval(IntervalMode01::Closed0_Open1)
     }
 
     /// Produce a random f32 in [0.0, 1.0).
@@ -156,36 +171,43 @@ impl MPRng {
 }
 
 impl MPRng {
+    // /// Box-Muller method
     // pub fn norm(&mut self) -> f64 {
-    //     let mut r = self.next_f64();
-    //     let mut theta = self.next_f64();
-    //     let SCALE = 0.5_f64;
+    //     if let Some(z) = self.spare_norm.take() {
+    //         return z;
+    //     }
+    //     let t = -1.0 * self.next_f64_intervalmode(IntervalMode01::Open0_Closed1).ln();
+    //     let r = (2.0 * t).sqrt();
 
+    //     let mut theta = self.next_f64();
     //     // pub const PI: f64 = 3.14159265358979323846264338327950288_f64; // 3.1415926535897931f64
     //     // pub const PI: f32 = 3.14159265358979323846264338327950288_f32; // 3.14159274f32
     //     theta = 2.0 * std::f64::consts::PI * theta;
-    //     r *= SCALE; 
-    //     r = r.exp();
-    //     r = (2.0*r).sqrt();
 
-    //     let f1 = r*theta.sin();
-    //     let f2 = r*theta.cos();
+    //     let z0 = r * theta.sin();
+    //     let z1 = r * theta.cos();
+    //     self.spare_norm = Some(z1);
 
-    //     f1
+    //     z0 
     // }
 
+    /// Box-Muller method
     pub fn norm(&mut self) -> f64 {
-        let mut t = -1.0*self.next_f64().ln();
-        let r = (2.0*t).sqrt();
+        if let Some(z) = self.spare_norm.take() {
+            return z;
+        }
+        let u0 = self.next_f64_interval(IntervalMode01::Open0_Closed1);   // (0.0, 1.0]
+        let u1 = self.next_f64();  // [0.0, 1.0)
 
-        let mut theta = self.next_f64();
+        let r = (-2.0 * u0.ln()).sqrt();
         // pub const PI: f64 = 3.14159265358979323846264338327950288_f64; // 3.1415926535897931f64
         // pub const PI: f32 = 3.14159265358979323846264338327950288_f32; // 3.14159274f32
-        theta = 2.0 * std::f64::consts::PI * theta;
+        let theta = 2.0 * std::f64::consts::PI * u1;
 
-        let f1 = r*theta.sin();
-        let _f2 = r*theta.cos();
+        let z0 = r * theta.cos();
+        let z1 = r * theta.sin();
+        self.spare_norm = Some(z1);
 
-        f1
+        z0 
     }
 }
