@@ -62,6 +62,34 @@ pub enum IntervalMode01 {
     Open0_Closed1 = 1,  // (0,1]
 }
 
+use std::ops::Mul;
+
+pub trait SupportedFloat: Copy + Mul<Self, Output=Self> {
+    const MANTISSA_DIGITS: u32; 
+    const BITS: u32;
+    const SCALE: Self;
+
+    fn from_u64(x: u64) -> Self;
+}
+
+impl SupportedFloat for f64 {
+    const MANTISSA_DIGITS: u32 = f64::MANTISSA_DIGITS;
+    const BITS: u32 = 64;
+    const SCALE: f64 = 1.0 / ((1u64 << Self::MANTISSA_DIGITS) as f64);
+    #[inline(always)]
+    fn from_u64(x: u64) -> Self { x as Self}
+}
+
+impl SupportedFloat for f32 {
+    const MANTISSA_DIGITS: u32 = f32::MANTISSA_DIGITS;
+    const BITS: u32 = 32;
+    const SCALE: f32 = 1.0 / ((1u64 << Self::MANTISSA_DIGITS) as f32);
+    #[inline(always)]
+    fn from_u64(x: u64) -> Self { x as Self}
+}
+
+
+
 impl MPRng {
     /// Produce next 64 bits of output.
     pub fn next_u64(&mut self) -> u64 {
@@ -69,31 +97,41 @@ impl MPRng {
     }
 
     /// Produce next 32 bits of output.
+    #[inline(always)]
     pub fn next_u32(&mut self) -> u32 {
         (self.next_u64() >> 32) as u32
     }
 
-    #[inline]
-    pub fn next_f64_interval(&mut self, mode: IntervalMode01) -> f64 {
-        const SCALE: f64 = 1.0 / ((1u64 << f64::MANTISSA_DIGITS) as f64);
-        let v = (self.next_u64() >> (64 - f64::MANTISSA_DIGITS)) + (mode as u64);
-        (v as f64) * SCALE
+    #[inline(always)]
+    pub fn next_float_interval<T: SupportedFloat>(&mut self, mode: IntervalMode01) -> T {
+        let v = (self.next_u64() >> (64 - T::MANTISSA_DIGITS)) + (mode as u64);
+        T::from_u64(v) * T::SCALE
     }
 
+    // #[inline]
+    // pub fn next_f64_interval(&mut self, mode: IntervalMode01) -> f64 {
+    //     const M: u32 = f64::MANTISSA_DIGITS;
+    //     const SCALE: f64 = 1.0 / ((1u64 << M) as f64);
+    //     let v = (self.next_u64() >> (64 - M)) + (mode as u64);
+    //     (v as f64) * SCALE
+    // }
+
     /// Produce a random f64 in [0.0, 1.0).
-    #[inline]
+    #[inline(always)]
     pub fn next_f64(&mut self) -> f64 {
         // const SCALE: f64 = 1.0 / ((1u64 << 53) as f64);
         // let v = self.next_u64() >> 11;
         // (v as f64) * SCALE
-        self.next_f64_interval(IntervalMode01::Closed0_Open1)
+        self.next_float_interval(IntervalMode01::Closed0_Open1)
     }
 
     /// Produce a random f32 in [0.0, 1.0).
+    #[inline(always)]
     pub fn next_f32(&mut self) -> f32 {
-        const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
-        let v = (self.next_u64() >> 40) as u32;
-        (v as f32) * SCALE
+        // const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
+        // let v = (self.next_u64() >> 40) as u32;
+        // (v as f32) * SCALE
+        self.next_float_interval(IntervalMode01::Closed0_Open1)
     }
 
     /// Produce a random boolean.
@@ -171,33 +209,13 @@ impl MPRng {
 }
 
 impl MPRng {
-    // /// Box-Muller method
-    // pub fn norm(&mut self) -> f64 {
-    //     if let Some(z) = self.spare_norm.take() {
-    //         return z;
-    //     }
-    //     let t = -1.0 * self.next_f64_intervalmode(IntervalMode01::Open0_Closed1).ln();
-    //     let r = (2.0 * t).sqrt();
-
-    //     let mut theta = self.next_f64();
-    //     // pub const PI: f64 = 3.14159265358979323846264338327950288_f64; // 3.1415926535897931f64
-    //     // pub const PI: f32 = 3.14159265358979323846264338327950288_f32; // 3.14159274f32
-    //     theta = 2.0 * std::f64::consts::PI * theta;
-
-    //     let z0 = r * theta.sin();
-    //     let z1 = r * theta.cos();
-    //     self.spare_norm = Some(z1);
-
-    //     z0 
-    // }
-
     /// Box-Muller method
     pub fn norm(&mut self) -> f64 {
         if let Some(z) = self.spare_norm.take() {
             return z;
         }
-        let u0 = self.next_f64_interval(IntervalMode01::Open0_Closed1);   // (0.0, 1.0]
-        let u1 = self.next_f64();  // [0.0, 1.0)
+        let u0: f64 = self.next_float_interval(IntervalMode01::Open0_Closed1);   // (0.0, 1.0]
+        let u1: f64 = self.next_f64();  // [0.0, 1.0)
 
         let r = (-2.0 * u0.ln()).sqrt();
         // pub const PI: f64 = 3.14159265358979323846264338327950288_f64; // 3.1415926535897931f64
