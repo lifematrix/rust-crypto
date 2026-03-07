@@ -108,16 +108,8 @@ impl MPRng {
         T::from_u64(v) * T::SCALE
     }
 
-    // #[inline]
-    // pub fn next_f64_interval(&mut self, mode: IntervalMode01) -> f64 {
-    //     const M: u32 = f64::MANTISSA_DIGITS;
-    //     const SCALE: f64 = 1.0 / ((1u64 << M) as f64);
-    //     let v = (self.next_u64() >> (64 - M)) + (mode as u64);
-    //     (v as f64) * SCALE
-    // }
-
     /// Produce a random f64 in [0.0, 1.0).
-    #[inline(always)]
+    #[inline(never)]
     pub fn next_f64(&mut self) -> f64 {
         // const SCALE: f64 = 1.0 / ((1u64 << 53) as f64);
         // let v = self.next_u64() >> 11;
@@ -126,7 +118,7 @@ impl MPRng {
     }
 
     /// Produce a random f32 in [0.0, 1.0).
-    #[inline(always)]
+    //#[inline(always)]
     pub fn next_f32(&mut self) -> f32 {
         // const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
         // let v = (self.next_u64() >> 40) as u32;
@@ -210,6 +202,7 @@ impl MPRng {
 
 impl MPRng {
     /// Box-Muller method
+    #[inline(never)]
     pub fn norm(&mut self) -> f64 {
         if let Some(z) = self.spare_norm.take() {
             return z;
