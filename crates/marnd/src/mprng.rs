@@ -58,10 +58,19 @@ impl fmt::Display for MPRng {
 }
 
 pub enum IntervalMode01 {
-    Closed0_Open1 = 0,  // [0,1)
-    Open0_Closed1 = 1,  // (0,1]
+    Closed0_Open1,  // [0,1)
+    Open0_Closed1,  // (0,1]
 }
 
+impl IntervalMode01 {
+    #[inline(always)]
+    fn offset(self) -> u64 {
+        match self {
+            IntervalMode01::Closed0_Open1 => 0,
+            IntervalMode01::Open0_Closed1 => 1,
+        }
+    }
+}
 use std::ops::Mul;
 
 pub trait SupportedFloat: Copy + Mul<Self, Output=Self> {
@@ -104,12 +113,12 @@ impl MPRng {
 
     #[inline(always)]
     pub fn next_float_interval<T: SupportedFloat>(&mut self, mode: IntervalMode01) -> T {
-        let v = (self.next_u64() >> (64 - T::MANTISSA_DIGITS)) + (mode as u64);
+        let v = (self.next_u64() >> (64 - T::MANTISSA_DIGITS)) + mode.offset();
         T::from_u64(v) * T::SCALE
     }
 
     /// Produce a random f64 in [0.0, 1.0).
-    #[inline(never)]
+    #[inline(always)]
     pub fn next_f64(&mut self) -> f64 {
         // const SCALE: f64 = 1.0 / ((1u64 << 53) as f64);
         // let v = self.next_u64() >> 11;
@@ -118,7 +127,7 @@ impl MPRng {
     }
 
     /// Produce a random f32 in [0.0, 1.0).
-    //#[inline(always)]
+    #[inline(never)]
     pub fn next_f32(&mut self) -> f32 {
         // const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
         // let v = (self.next_u64() >> 40) as u32;
