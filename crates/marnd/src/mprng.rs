@@ -127,7 +127,7 @@ impl MPRng {
     }
 
     /// Produce a random f32 in [0.0, 1.0).
-    #[inline(never)]
+    #[inline(always)]
     pub fn next_f32(&mut self) -> f32 {
         // const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
         // let v = (self.next_u64() >> 40) as u32;
