@@ -36,7 +36,7 @@ fn parse_f64(d: f64) {
     let exponent = ((bits >> 52) & 0x7FF) as u16; // 11 bits
     let fraction = (bits & 0xF_FFFF_FFFF_FFFF) as u64;
 
-    println!("the number : {}, bits: {:064b}", d, bits);
+    println!("the number : {}, hex: {:x}, bits: {:064b}", d, bits, bits);
     println!("sign: {:b}", sign);
     println!(
         "exponent: {:011b}, {} without bias",
@@ -111,4 +111,6 @@ fn main() {
     // let zuu = z.try_into::<u64>().ok_or("out of range");
     // let zuu = TryInto::<u64>::try_into(z).ok_or("out of range");
     // println!("zu = {:016X}", zuu);
+    parse_f64(std::f64::consts::PI);
+    parse_f64(2.0*std::f64::consts::PI);
 }
