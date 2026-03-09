@@ -224,10 +224,19 @@ impl MPRng {
         // pub const PI: f32 = 3.14159265358979323846264338327950288_f32; // 3.14159274f32
         let theta = 2.0 * std::f64::consts::PI * u1;
 
-        let z0 = r * theta.cos();
-        let z1 = r * theta.sin();
-        self.spare_norm = Some(z1);
+        // let theta_cos = theta.cos();
+        // let mut theta_sin = (1.0 - theta_cos.powi(2)).sqrt();
+        // if theta >= std::f64::consts::PI {
+        //     theta_sin = -theta_sin;
+        // }
+        // let z0 = theta_cos * r;
+        // let z1 = theta_sin * r;
 
+        let (theta_sin, theta_cos) = theta.sin_cos();
+        let z0 = r * theta_cos;
+        let z1 = r * theta_sin;
+
+        self.spare_norm = Some(z1);
         z0 
     }
 }
