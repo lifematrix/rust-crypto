@@ -212,7 +212,7 @@ impl MPRng {
 impl MPRng {
     /// Box-Muller method
     #[inline(never)]
-    pub fn norm(&mut self) -> f64 {
+    pub fn norm_box_muller(&mut self) -> f64 {
         if let Some(z) = self.spare_norm.take() {
             return z;
         }
