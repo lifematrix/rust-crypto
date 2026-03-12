@@ -112,9 +112,10 @@ pub trait SupportedFloat: Copy + Mul<Self, Output = Self> + Add<Self, Output = S
     fn from_bits(x: Self::BitsType) -> Self;
     fn u64_to_bitstype(x: u64) -> Self::BitsType;
 
-    fn from_fastbits_u64(x: u64) -> Self {
-        let manissa_bits = Self::u64_to_bitstype(x >> Self::FAST_SHIFT_BITS);
-        let bits = Self::ONE_AS_BITS | manissa_bits;
+    #[inline(always)]
+    fn fast_base_from_u64(x: u64) -> Self {
+        let mantissa_bits = Self::u64_to_bitstype(x >> Self::FAST_SHIFT_BITS);
+        let bits = Self::ONE_AS_BITS | mantissa_bits;
         Self::from_bits(bits)
     }
 }
@@ -125,6 +126,7 @@ impl SupportedFloat for f64 {
     const MANTISSA_DIGITS: u32 = f64::MANTISSA_DIGITS;
     const SCALE: f64 = 1.0 / ((1u64 << Self::MANTISSA_DIGITS) as f64);
     
+    // 0x3ff0_0000_0000_0000_u64
     const ONE_AS_BITS: Self::BitsType = Self::to_bits(1.0);
 
     #[inline(always)]
@@ -161,6 +163,8 @@ impl SupportedFloat for f32 {
 
     const MANTISSA_DIGITS: u32 = f32::MANTISSA_DIGITS;
     const SCALE: f32 = 1.0 / ((1u64 << Self::MANTISSA_DIGITS) as f32);
+
+    // 0x3f80_0000_u32
     const ONE_AS_BITS: Self::BitsType = Self::to_bits(1.0);
 
     #[inline(always)]
@@ -223,14 +227,15 @@ impl MPRng {
         // const SCALE: f32 = 1.0 / ((1u32 << 24) as f32);
         // let v = (self.next_u64() >> 40) as u32;
         // (v as f32) * SCALE
-        self.next_float_interval(IntervalMode01::Closed0_Open1)
+        // self.next_float_interval(IntervalMode01::Closed0_Open1)
+        self.next_float_interval(IntervalMode01::Open0_Closed1)
     }
 
     #[inline(always)]
     pub fn next_float_fast_interval<T: SupportedFloat>(&mut self, mode: IntervalMode01) -> T {
         let v = self.next_u64();
         let (sign, base) = mode.fast_sign_base();
-        let x = T::from_fastbits_u64(v);
+        let x = T::fast_base_from_u64(v);
         T::from_i32(sign) * x + T::from_i32(base)
     }
 
