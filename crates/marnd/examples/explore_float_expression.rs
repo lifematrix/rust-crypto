@@ -112,5 +112,8 @@ fn main() {
     // let zuu = TryInto::<u64>::try_into(z).ok_or("out of range");
     // println!("zu = {:016X}", zuu);
     parse_f64(std::f64::consts::PI);
-    parse_f64(2.0*std::f64::consts::PI);
+    parse_f64(2.0 * std::f64::consts::PI);
+
+    println!("{:016x}", f64::to_bits(1.0));
+    println!("{:08x}", f32::to_bits(1.0));
 }

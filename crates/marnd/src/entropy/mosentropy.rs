@@ -1,8 +1,8 @@
+use crate::MRndErr;
 use std::fs::File;
 use std::io;
 use std::io::{Error, ErrorKind};
 use std::result::Result::Err;
-use crate::MRndErr;
 
 pub struct MOSEntropy;
 
@@ -13,7 +13,10 @@ impl MOSEntropy {
         use std::fs::File;
         use std::io::Read;
 
-        let mut f = File::open(PATH).map_err(|e| MRndErr::EntropyOpen{path: PATH, source: e})?;
+        let mut f = File::open(PATH).map_err(|e| MRndErr::EntropyOpen {
+            path: PATH,
+            source: e,
+        })?;
         f.read_exact(out)?;
         Ok(())
     }

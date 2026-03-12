@@ -23,7 +23,12 @@ static LCG64_PRESETS: LazyLock<HashMap<&'static str, (u64, u64)>> = LazyLock::ne
 
 impl Lcg64 {
     pub fn new(a: u64, c: u64, seed: u64) -> Self {
-        Self { a, c, state: seed, preset: None }
+        Self {
+            a,
+            c,
+            state: seed,
+            preset: None,
+        }
     }
 
     pub fn get_preset(name: &str) -> Option<(u64, u64)> {

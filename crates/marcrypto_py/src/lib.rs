@@ -1,5 +1,5 @@
-use pyo3::prelude::*;
 use marcore::pkg_version;
+use pyo3::prelude::*;
 
 pub mod random;
 

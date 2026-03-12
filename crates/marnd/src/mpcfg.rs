@@ -87,8 +87,8 @@ impl MPCfg {
         };
 
         CfgUtil::parse_u64(s)
-        .map(Some)
-        .map_err(|_| MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s)))
+            .map(Some)
+            .map_err(|_| MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s)))
         // CfgUtil::parse_u64(s)
         //     .map_err(|_| MRndErr::ParseErr(format!("Invalid u64 for '{}': '{}'", key, s)))
         //     .map(|x| {
